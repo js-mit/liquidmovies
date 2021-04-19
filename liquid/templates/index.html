@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} Welcome to F{% endblock %}</h1>
+
+    {% for vid in vids %}
+        {{vid}}
+        <a href="#">
+            <h2>{{ vid['url'] }}</h2>
+        </a>
+        <hr>
+    {% endfor %}
+{% endblock %}
