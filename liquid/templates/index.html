@@ -3,12 +3,12 @@
 {% block content %}
     <h1>{% block title %} Liquid Movies {% endblock %}</h1>
 
-    {% for vid in vids %}
-        <a href="{{ url_for('video', video_id=vid['id']) }}">
-            <h2>{{ vid['id'] }}</h2>
+    {% for video in videos %}
+        <a href="{{ url_for('video', video_id=video['id']) }}">
+            <h2>{{ video['id'] }}</h2>
         </a>
 
-        <a href="{{ url_for('bookmarker', video_id=vid['id']) }}">
+        <a href="{{ url_for('bookmarker', video_id=video['id']) }}">
             Add bookmarks
         </a>
 

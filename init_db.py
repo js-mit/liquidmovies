@@ -1,35 +1,33 @@
-import sqlite3
-import pathlib
+from liquid.database import db_session, init_db
+from liquid.models import LiquidMethod, Liquid, Video
 
-schema_path = str(pathlib.Path(__file__).parent/"liquid/schema.sql")
-db_path = str(pathlib.Path(__file__).parent/"instance/liquid.sqlite")
+# set up database
+init_db()
 
-conn = sqlite3.connect(db_path, detect_types=sqlite3.PARSE_DECLTYPES)
-
-# load up the schema
-with open(schema_path) as f:
-    conn.executescript(f.read())
-
-# insert dummy entries
-cur = conn.cursor()
-
-cur.execute(
-    "INSERT INTO video (url, ip) VALUES (?, ?)",
-    ("https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4", "0.0.0.0")
+v = Video(
+    url="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
 )
+db_session.add(v)
+v = Video(url="https://vjs.zencdn.net/v/oceans.mp4")
+db_session.add(v)
+v = Video(url="http://localhost:9004/mit_test.mp4")
+db_session.add(v)
 
-cur.execute(
-    "INSERT INTO video (url, ip) VALUES (?, ?)",
-    ("https://vjs.zencdn.net/v/oceans.mp4", "0.0.0.0")
+m = LiquidMethod(name="bookmark")
+db_session.add(m)
+m = LiquidMethod(name="other")
+db_session.add(m)
+
+l = Liquid(
+    video=2,
+    liquid="[{start: 3, stop: 5}, {start: 20, stop: 23}, {start: 35, stop: 38}]",
+    method=1,
+    desc="fake bookmarks",
 )
-
-cur.execute(
-    "INSERT INTO video (url, ip) VALUES (?, ?)", ("http://localhost:9004/mit_test.mp4", "0.0.0.0")
+db_session.add(l)
+l = Liquid(
+    video=2, liquid="[{start: 5, stop: 10}]", method=1, desc="another fake bookmark"
 )
+db_session.add(l)
 
-cur.execute(
-    "INSERT INTO liquid (video, liquid, method, desc) VALUES (?, ?, ?, ?)", (2, "[{start: 3, stop: 5}, {start: 20, stop: 23}, {start: 35, stop: 38}]", 1, "fake bookmark")
-)
-
-conn.commit()
-conn.close()
+db_session.commit()

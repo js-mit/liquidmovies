@@ -1,16 +1,13 @@
 import os
 from flask import Flask, render_template
 from werkzeug.exceptions import abort
-from . import db
+from .database import db_session, init_db
+from .models import LiquidMethod, Liquid, Video
 
 
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
-    app.config.from_mapping(
-        SECRET_KEY="dev",
-        DATABASE=os.path.join(app.instance_path, "liquid.sqlite"),
-    )
 
     if test_config is None:
         # load the instance config, if it exists, when not testing
@@ -30,33 +27,29 @@ def create_app(test_config=None):
     def hello():
         return "Hello, World!"
 
+    # routes
     @app.route("/")
     def index():
-        conn = db.get_db()
-        vids = conn.execute("SELECT * FROM video").fetchall()
-        conn.close()
-        return render_template("index.html", vids=vids)
+        videos = Video.query.all()
+        return render_template("index.html", videos=videos)
 
     @app.route("/video/<int:video_id>")
     def video(video_id):
-        conn = db.get_db()
-        video = conn.execute("SELECT * FROM video WHERE id = ?", (video_id,)).fetchone()
-        liquids = conn.execute("SELECT id, method, desc FROM liquid WHERE video = ?", (video_id,)).fetchall()
-        liquids = [{"id": l["id"], "method": l["method"], "desc": l["desc"]} for l in liquids]
-        conn.close()
+        video = Video.query.filter(Video.id == video_id).first()
+        liquids = (
+            Liquid.query.with_entities(Liquid.id, Liquid.method, Liquid.desc)
+            .filter(video == video_id)
+            .all()
+        )
         if video is None:
             abort(404)
         return render_template("video.html", video=video, liquids=liquids)
 
     @app.route("/bookmarker/<int:video_id>")
     def bookmarker(video_id):
-        conn = db.get_db()
-        video = conn.execute("SELECT * FROM video WHERE id = ?", (video_id,)).fetchone()
-        conn.close()
+        video = Video.query.filter(Video.id == video_id).first()
         if video is None:
             abort(404)
         return render_template("bookmarker.html", video=video)
-
-    db.init_app(app)
 
     return app
