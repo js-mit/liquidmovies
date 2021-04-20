@@ -6,3 +6,22 @@ CREATE TABLE video (
   ip TEXT DEFAULT "0.0.0.0",
   url TEXT NOT NULL
 );
+
+CREATE TABLE liquid (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+  video INTEGER NOT NULL,
+  liquid TEXT,
+  method TEXT NOT NULL,
+  desc TEXT,
+  FOREIGN KEY(video) REFERENCES video (id),
+  FOREIGN KEY(method) REFERENCES liquid_method (id)
+);
+
+CREATE TABLE liquid_method (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL
+);
+
+INSERT INTO liquid_method (name) VALUES ("bookmark");
+INSERT INTO liquid_method (name) VALUES ("person");

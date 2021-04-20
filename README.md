@@ -1,9 +1,10 @@
 # build docker
 ```
-apt-get install sqlite3
+apt-get update && apt-get upgrade
+apt-get install sqlite3 libsqlite3-dev
 ```
 
-# set up 
+# set up docker
 Run this application through docker
 
 ```
@@ -22,3 +23,9 @@ make sure `FLASK_APP`and `FLASK_ENV` is defined in your session
 export FLASK_APP=liquid
 export FLASK_ENV=development
 ```
+
+# db
+db commands must be run through docker otherwise you will encounter permission errors
+
+sqlite3 interactive must be run *outside* of docker because it is not installed
+in docker container (i think bc of python slim version)

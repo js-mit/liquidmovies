@@ -1,13 +1,17 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>{% block title %} Welcome to F{% endblock %}</h1>
+    <h1>{% block title %} Liquid Movies {% endblock %}</h1>
 
     {% for vid in vids %}
-        {{vid}}
-        <a href="#">
-            <h2>{{ vid['url'] }}</h2>
+        <a href="{{ url_for('video', video_id=vid['id']) }}">
+            <h2>{{ vid['id'] }}</h2>
         </a>
+
+        <a href="{{ url_for('bookmarker', video_id=vid['id']) }}">
+            Add bookmarks
+        </a>
+
         <hr>
     {% endfor %}
 {% endblock %}
