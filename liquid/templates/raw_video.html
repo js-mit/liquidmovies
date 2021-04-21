@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} Raw Video {{ video.id }} {% endblock %}</h1>
+    {% include 'snippet/video.html' %}
+{% endblock %}

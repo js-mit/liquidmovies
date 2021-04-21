@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for
 from werkzeug.exceptions import abort
 from .database import db_session, init_db
 from .models import LiquidMethod, Liquid, Video
@@ -22,34 +22,48 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    # a simple page that says hello
-    @app.route("/hello")
-    def hello():
-        return "Hello, World!"
-
     # routes
     @app.route("/")
     def index():
-        videos = Video.query.all()
-        return render_template("index.html", videos=videos)
+        videos = Video.query.filter(Video.active==True).all()
+        liquids = Liquid.query.filter(Liquid.active==True).all()
+        return render_template("index.html", videos=videos, liquids=liquids)
 
     @app.route("/video/<int:video_id>")
-    def video(video_id):
-        video = Video.query.filter(Video.id == video_id).first()
-        liquids = (
-            Liquid.query.with_entities(Liquid.id, Liquid.method, Liquid.desc)
-            .filter(video == video_id)
-            .all()
-        )
+    def raw_video(video_id):
+        video = Video.query.filter(Video.id==video_id, Video.active==True).first()
         if video is None:
             abort(404)
-        return render_template("video.html", video=video, liquids=liquids)
+        return render_template("raw_video.html", video=video)
 
-    @app.route("/bookmarker/<int:video_id>")
-    def bookmarker(video_id):
-        video = Video.query.filter(Video.id == video_id).first()
-        if video is None:
+    @app.route("/video/<int:video_id>/method/<int:liquid_id>")
+    def liquid_video(video_id, liquid_id):
+        video = Video.query.filter(Video.id==video_id, Video.active==True).first()
+        liquid = Liquid.query.filter(Liquid.id==liquid_id, Liquid.active==True).first()
+        if video is None or liquid is None:
             abort(404)
-        return render_template("bookmarker.html", video=video)
+        return render_template("liquid_video.html", video=video, liquid=liquid)
+
+    @app.route("/bookmarker/<int:video_id>", methods=['GET', 'POST'])
+    def bookmarker(video_id):
+        if request.method=="POST":
+            bookmark = request.form.get("bookmarks")
+            liquid = Liquid(video=video_id, liquid=bookmark, method=1, desc="generated from webapp")
+            db_session.add(liquid)
+            db_session.commit()
+            return url_for('index')
+        else:
+            video = Video.query.filter(Video.id==video_id, Video.active==True).first()
+            if video is None:
+                abort(404)
+            return render_template("bookmarker.html", video=video)
+
+    @app.route("/liquid/delete/<int:liquid_id>")
+    def delete_liquid(liquid_id):
+        liquid = Liquid.query.filter(Liquid.id==liquid_id).first()
+        liquid.active = False
+        db_session.add(liquid)
+        db_session.commit()
+        return redirect(url_for('index'))
 
     return app

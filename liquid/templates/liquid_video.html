@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} Video {{ video.id }} | Liquid {{ liquid.id }} {% endblock %}</h1>
+
+    {% include 'snippet/video.html' %}
+
+    <!-- Custom Javascript -->
+	<script>
+        const liquid = {{ liquid.liquid |safe }};
+        console.log(liquid);
+    </script>
+    <script src="{{ url_for('static', filename='js/player.js') }}"></script>
+
+{% endblock %}

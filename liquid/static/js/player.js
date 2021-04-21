@@ -1,26 +1,19 @@
 'use strict';
 
-const fixedIntervals = [{start: 3, stop: 5}, {start: 20, stop: 23}, {start: 35, stop: 38}];
-
 $(document).ready(function() {
 
-    let intervals = fixedIntervals;
+    let intervals = liquid;
 
-    var player = videojs('my-player', {
-            controls: true,
-            autoplay: false,
-            preload: 'auto'
-        }, function onPlayerReady() {
+    var player = videojs('my-video', {}, function onPlayerReady() {
             videojs.log('Your player is ready!');
 
             // set up 
             let currInterval = intervals[0];
-            console.log(currInterval["start"] + "|" + currInterval["stop"]);
             this.currentTime(currInterval["start"])
 
             // How about an event listener?
             this.on('stopped', function() {
-                intervals = fixedIntervals; 
+                intervals = liquid; 
                 videojs.log('Awww...over so soon?!');
             });
         }

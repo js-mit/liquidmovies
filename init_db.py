@@ -8,9 +8,9 @@ v = Video(
     url="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
 )
 db_session.add(v)
-v = Video(url="https://vjs.zencdn.net/v/oceans.mp4")
+v = Video(url="https://vjs.zencdn.net/v/oceans.mp4", poster="//vjs.zencdn.net/v/oceans.png")
 db_session.add(v)
-v = Video(url="http://localhost:9004/mit_test.mp4")
+v = Video(url="http://localhost:9004/mit_test.mp4", poster="//vjs.zencdn.net/v/oceans.png")
 db_session.add(v)
 
 m = LiquidMethod(name="bookmark")
