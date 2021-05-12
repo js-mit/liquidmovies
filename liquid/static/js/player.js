@@ -41,14 +41,20 @@ $(document).ready(function() {
         $(".submit-new-speakers").click(() => {
             let updatedSpeakers = {};
             $(".update-speakers").children("input").each(function() {
-                let oldKey = this.data("key");
-                let newKey = this.val();
+                let oldKey = $(this).data("key");
+                let newKey = $(this).val();
                 updatedSpeakers[oldKey] = newKey;
             });
-            let postUrl = submitButton.data("action");
+            let postUrl = $(".submit-new-speakers").data("action");
 
-            $.post(postUrl, updatedSpeakers, function(data) {
+            $.post(postUrl, {
+                "mapping": JSON.stringify(updatedSpeakers),
+                "desc": "test"
+            }, function(data) {
                 window.location.replace(data);
+            })
+            .fail(function() {
+                alert("error");
             });
         });
     }
@@ -57,6 +63,8 @@ $(document).ready(function() {
 
 function setupPlayIntervals(intervals, player) {
     let _intervals = JSON.parse(JSON.stringify(intervals));
+
+    $(".control-next").click(nextInterval);
 
     function nextInterval() {
         _intervals.shift(); // Shift() pops first element off array

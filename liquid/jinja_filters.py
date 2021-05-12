@@ -1,5 +1,6 @@
-from flask import current_app as app
 import collections
+from flask import current_app as app
+
 
 @app.template_filter('render_timestamps')
 def render_timestamps(data):

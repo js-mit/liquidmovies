@@ -34,6 +34,12 @@ v = Video(
     poster="//vjs.zencdn.net/v/oceans.png",
 )
 db_session.add(v)
+v = Video(
+    url="https://liquidmovies.s3.amazonaws.com/tucker_vs_stewart.mp4",
+    name="Tucker Carlson vs John Stewart",
+    poster="//vjs.zencdn.net/v/oceans.png",
+)
+db_session.add(v)
 
 m = LiquidMethod(name="bookmark")
 db_session.add(m)
@@ -64,5 +70,8 @@ with open(data_dir/"friendss3.json") as json_file:
     data = json.load(json_file)
     l = Liquid(video_id=4, liquid=data, method_id=2, desc="diarization")
     db_session.add(l)
-
+with open(data_dir/"tucker_vs_stewart.json") as json_file:
+    data = json.load(json_file)
+    l = Liquid(video_id=5, liquid=data, method_id=2, desc="diarization")
+    db_session.add(l)
 db_session.commit()

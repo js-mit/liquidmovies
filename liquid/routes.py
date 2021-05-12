@@ -1,4 +1,5 @@
-from flask import render_template, request, redirect, url_for
+import json
+from flask import render_template, request, redirect, url_for, abort
 from flask import current_app as app
 from .database import db_session, init_db
 from .models import LiquidMethod, Liquid, Video
@@ -33,7 +34,7 @@ def bookmarker(video_id):
     if request.method == "POST":
         bookmarks = request.form.get("bookmarks")
         desc = request.form.get("desc")
-        liquid = Liquid(video=video_id, liquid=bookmarks, method=1, desc=desc)
+        liquid = Liquid(video_id=video_id, liquid=bookmarks, method_id=1, desc=desc)
         db_session.add(liquid)
         db_session.commit()
         return url_for("index")
@@ -56,7 +57,32 @@ def diarization(video_id):
 
 @app.route("/diarization/labels/<int:video_id>/<int:liquid_id>", methods=["POST"])
 def diarization_labels(video_id, liquid_id):
-    pass
+    mapping = request.form.get("mapping") # {"C": "john", "A": "tucker", "B": "john", "D": "tucker"}
+    liquid = Liquid.query.filter(Liquid.id == liquid_id).first()
+
+    # remap liquid bookmarks
+    bookmarks = liquid.liquid
+    mapping = json.loads(mapping)
+    for key, value in mapping.items():
+        if value in bookmarks:
+            bookmarks[value].append(bookmarks.pop(key))
+        else:
+            bookmarks[value] = bookmarks.pop(key)
+
+    # TODO check if remaining keys exist, then call error
+
+    # update liquid entry
+    new_liquid = Liquid(video_id=video_id, liquid=bookmarks, method_id=liquid.method_id, desc=liquid.desc)
+    liquid_id = new_liquid.id
+    db_session.add(new_liquid)
+    db_session.commit()
+
+    # update old liquid entry as inactive
+    liquid.active = False
+    db_session.add(liquid)
+    db_session.commit()
+
+    return url_for("liquid_video", liquid_id=liquid_id, video_id=video_id)
 
 
 @app.route("/liquid/delete/<int:liquid_id>")

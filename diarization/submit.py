@@ -45,10 +45,10 @@ def create_speaker_segments(lines):
     return speakers
 
 if __name__=="__main__":
-    f = open("friendss3.rttm", "r")
+    f = open("../../../scratch/liquid_data/tucker_vs_stewart.rttm", "r")
     lines = f.readlines()
 
     speakers = create_speaker_segments(lines)
 
-    with open("friendss3.json", "w") as outfile:
+    with open("../../../scratch/liquid_data/tucker_vs_stewart.json", "w") as outfile:
         json.dump(speakers, outfile)
