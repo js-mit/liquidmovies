@@ -18,14 +18,18 @@ sudo docker exect -it liquid bash
 (note, `liquid` in this command is the name of the docker container specified
 in the command above.)
 
-make sure `FLASK_APP`and `FLASK_ENV` is defined in your session
+Once inside interactive mode, make sure `FLASK_APP`and `FLASK_ENV` is defined in your session
 ```
 export FLASK_APP=liquid
 export FLASK_ENV=development
 ```
 
-# db
-db commands must be run through docker otherwise you will encounter permission errors
+# sqlite
+sqlite db commands must be run through docker otherwise you will encounter permission errors
 
 sqlite3 interactive must be run *outside* of docker because it is not installed
 in docker container (i think bc of python slim version)
+
+```
+sqlite3 instance/liquid.db
+```

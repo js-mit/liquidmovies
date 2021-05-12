@@ -1,6 +1,7 @@
 var maxField = 10; //Input fields increment limitation
 var addButton = $('.add_button'); //Add button selector
 var wrapper = $('.wrapper'); //Input field wrapper
+var desc = $('.desc');
 var submitButton = $('.submit'); 
 var fieldHTML = `
     <div class="bookmark">
@@ -22,7 +23,8 @@ $(document).ready(() => {
             wrapper.append(fieldHTML); 
         }
     });
-    
+    addButton.trigger("click");
+
     //Once remove button is clicked
     wrapper.on('click', '.remove_button', (e) => {
         $(this).parent('div').remove(); //Remove field html
@@ -31,11 +33,13 @@ $(document).ready(() => {
 
     //Submit form
     submitButton.click(() => {
-        body = getBookmarks();
+        bookmarks = getBookmarks();
+        desc = desc.val();
         postUrl = submitButton.data("action");
 
         $.post(postUrl, {
-            "bookmarks": JSON.stringify(body)
+            "bookmarks": JSON.stringify(bookmarks),
+            "desc": desc
         }, function(data) {
             console.log(data);
             window.location.replace(data);

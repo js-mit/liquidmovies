@@ -2,7 +2,11 @@
 
 {% block content %}
     <h1>{% block title %} Bookmarker {{ video.id }} {% endblock %}</h1>
-    {% include 'snippet/video.html' %}
+    {% include 'snippets/video.html' %}
+    <div>
+        Description: <input class="desc" type="text"/>
+    </div>
+    <hr>
     <div>
         <button class="add_button">Add Bookmark</button>
     </div>

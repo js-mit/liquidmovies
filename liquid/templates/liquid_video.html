@@ -3,11 +3,31 @@
 {% block content %}
     <h1>{% block title %} Video {{ video.id }} | Liquid {{ liquid.id }} {% endblock %}</h1>
 
-    {% include 'snippet/video.html' %}
+    {% include 'snippets/video.html' %}
+
+    <div class="controls"></div>
+
+    {% if liquid.method_id == 2 %}
+        <hr>
+        <div class="update-speakers"></div>
+        <button class="submit-new-speakers" type="submit" data-action="{{ url_for('diarization_labels', video_id=video.id, liquid_id=liquid.id) }}">Submit</button>
+    {% endif %}
+    <hr>
+    <div class="vid-desc">
+        desc: {{ liquid.desc }}
+    </div>
+    <div class="vid-method">
+        method: {{ liquid.method }}
+    </div>
+    <div class="vid-instructions">
+        instructions: {{ liquid.liquid | render_timestamps }}
+    </div>
+
 
     <!-- Custom Javascript -->
 	<script>
-        const liquid = {{ liquid.liquid |safe }};
+        const liquid = {{ liquid.liquid | safe }};
+        const method = {{ liquid.method_id | safe }};
         console.log(liquid);
     </script>
     <script src="{{ url_for('static', filename='js/player.js') }}"></script>
