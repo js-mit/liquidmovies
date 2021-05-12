@@ -16,6 +16,12 @@ def convert(seconds):
 
 
 def map_nested_objs(ob, func):
+    """
+    This function recursively  pplies `func` to each obj nested within a dictionary/array
+    structure. Ex given ob [{"a": 1}, {"b": 2}], `func()` will be applied 1 and 2
+
+    This function applies `func` in place and returns `ob`
+    """
     if isinstance(ob, collections.Mapping):
         return {k: map_nested_objs(v, func) for k, v in ob.items()}
     elif isinstance(ob, collections.Iterable):

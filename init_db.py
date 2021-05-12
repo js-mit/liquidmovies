@@ -1,6 +1,12 @@
+# Testing purposes only
 import json
+from pathlib import Path
 from liquid.database import db_session, init_db
 from liquid.models import LiquidMethod, Liquid, Video
+
+# Set the location of where to get data from. This vriable is subject to change
+# depending on where the data is located
+data_dir = Path.home().parent/"scratch"/"liquid_data"
 
 # set up database
 init_db()
@@ -50,11 +56,11 @@ l = Liquid(
     desc="another fake bookmark",
 )
 db_session.add(l)
-with open("diarization/79m.json") as json_file:
+with open(data_dir/"mit_covid_vaccine_lecture.json") as json_file:
     data = json.load(json_file)
     l = Liquid(video_id=3, liquid=data, method_id=2, desc="diarization")
     db_session.add(l)
-with open("diarization/friendss3.json") as json_file:
+with open(data_dir/"friendss3.json") as json_file:
     data = json.load(json_file)
     l = Liquid(video_id=4, liquid=data, method_id=2, desc="diarization")
     db_session.add(l)
