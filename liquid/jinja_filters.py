@@ -1,4 +1,5 @@
 import collections
+import json
 from flask import current_app as app
 
 
@@ -16,16 +17,18 @@ def convert(seconds):
     return "%d:%02d:%02d" % (hour, minutes, seconds)
 
 
-def map_nested_objs(ob, func):
+def map_nested_objs(obj, func):
     """
-    This function recursively  pplies `func` to each obj nested within a dictionary/array
+    This function recursively applies `func` to each obj nested within a dictionary/array
     structure. Ex given ob [{"a": 1}, {"b": 2}], `func()` will be applied 1 and 2
 
     This function applies `func` in place and returns `ob`
     """
-    if isinstance(ob, collections.Mapping):
-        return {k: map_nested_objs(v, func) for k, v in ob.items()}
-    elif isinstance(ob, collections.Iterable):
-        return [map_nested_objs(v, func) for v in ob]
+    if isinstance(obj, str):
+        return map_nested_objs(json.loads(obj), func)
+    elif isinstance(obj, collections.Mapping):
+        return {k: map_nested_objs(v, func) for k, v in obj.items()}
+    elif isinstance(obj, collections.Iterable):
+        return [map_nested_objs(v, func) for v in obj]
     else:
-        return func(ob)
+        return func(obj)

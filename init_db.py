@@ -50,14 +50,14 @@ db_session.add(m)
 
 l = Liquid(
     video_id=2,
-    liquid="[{start: 3, stop: 5}, {start: 20, stop: 23}, {start: 35, stop: 38}]",
+    liquid='[{"start": 3, "stop": 5}, {"start": 20, "stop": 23}, {"start": 35, "stop": 38}]',
     method_id=1,
     desc="fake bookmarks",
 )
 db_session.add(l)
 l = Liquid(
     video_id=2,
-    liquid="[{start: 5, stop: 10}]",
+    liquid='[{"start": 5, "stop": 10}]',
     method_id=1,
     desc="another fake bookmark",
 )
