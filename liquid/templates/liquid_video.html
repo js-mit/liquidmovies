@@ -1,18 +1,40 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>{% block title %} Video {{ video.id }} | Liquid {{ liquid.id }} {% endblock %}</h1>
+
+    <script>
+        const liquid = {{ liquid.liquid | safe }};
+        const method = {{ liquid.method_id | safe }};
+    </script>
+    <script src="{{ url_for('static', filename='js/player.js') }}"></script>
 
     {% include 'snippets/video.html' %}
 
-    <div class="controls"></div>
-        <button class="control-next">NEXT</button>
+    {% if liquid.method_id == 1 %}
+    {% include 'controllers/segments.html' %}
+    <script src="{{ url_for('static', filename='js/controllers/segments.js') }}"></script>
+    {% endif %}
 
+    {% if liquid.method_id == 2 %}
+    {% include 'controllers/heatgraph.html' %}
+    <script src="{{ url_for('static', filename='js/controllers/heatgraph.js') }}"></script>
+    {% endif %}
+
+    {% if liquid.method_id == 3 %}
+    {% include 'controllers/markers.html' %}
+    <script src="{{ url_for('static', filename='js/controllers/markers.js') }}"></script>
+    {% endif %}
+
+    {#
     {% if liquid.method_id == 2 %}
         <hr>
         <div class="update-speakers"></div>
         <button class="submit-new-speakers" type="submit" data-action="{{ url_for('diarization_labels', video_id=video.id, liquid_id=liquid.id) }}">Submit</button>
     {% endif %}
+    #}
+    <hr>
+    <h1>{% block title %} Video {{ video.id }} | Liquid {{ liquid.id }} {% endblock %}</h1>
+
     <hr>
     <div class="vid-desc">
         desc: {{ liquid.desc }}
@@ -21,15 +43,7 @@
         method: {{ liquid.method }}
     </div>
     <div class="vid-instructions">
-        instructions: {{ liquid.liquid | render_timestamps }}
+        instructions: {{ liquid.liquid }}
     </div>
-
-
-    <!-- Custom Javascript -->
-	<script>
-        const liquid = {{ liquid.liquid | safe }};
-        const method = {{ liquid.method_id | safe }};
-    </script>
-    <script src="{{ url_for('static', filename='js/player.js') }}"></script>
 
 {% endblock %}

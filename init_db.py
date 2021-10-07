@@ -45,23 +45,40 @@ m = LiquidMethod(name="bookmark")
 db_session.add(m)
 m = LiquidMethod(name="diarization")
 db_session.add(m)
-m = LiquidMethod(name="other")
+m = LiquidMethod(name="markers")
 db_session.add(m)
 
+instructions = '[{"start": 3, "stop": 5}, {"start": 20, "stop": 23}, {"start": 35, "stop": 38}]'
 l = Liquid(
     video_id=2,
-    liquid='[{"start": 3, "stop": 5}, {"start": 20, "stop": 23}, {"start": 35, "stop": 38}]',
+    liquid=json.loads(instructions),
     method_id=1,
     desc="fake bookmarks",
 )
 db_session.add(l)
+
+instructions = '[{"start": 5, "stop": 10}]'
 l = Liquid(
     video_id=2,
-    liquid='[{"start": 5, "stop": 10}]',
+    liquid=json.loads(instructions),
     method_id=1,
     desc="another fake bookmark",
 )
 db_session.add(l)
+
+instructions = [[""]] * 46
+instructions[10] = ["dog", "mouse"]
+instructions[20] = ["dog", "cat"]
+instructions[22] = ["dog", "floor"]
+instructions[25] = ["dog", "floor", "mouse"]
+l = Liquid(
+    video_id=2,
+    liquid=instructions,
+    method_id=3,
+    desc="TEST markers on our vid",
+)
+db_session.add(l)
+
 with open(data_dir/"mit_covid_vaccine_lecture.json") as json_file:
     data = json.load(json_file)
     l = Liquid(video_id=3, liquid=data, method_id=2, desc="diarization")
