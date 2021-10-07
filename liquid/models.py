@@ -32,18 +32,18 @@ class Liquid(Base):
     time_created = Column(DateTime(timezone=True), server_default=func.now())
     video_id = Column(Integer, ForeignKey("video.id"))
     liquid = Column(JSON, nullable=False)
-    method_id = Column(Integer, ForeignKey("liquid_method.id"))
+    controller_id = Column(Integer, ForeignKey("controller.id"))
     desc = Column(Text)
     active = Column(Boolean, unique=False, default=True)
-    method = relationship("LiquidMethod", backref="liquids")
+    controller = relationship("Controller", backref="liquids")
     video = relationship("Video", backref="liquids")
 
     def __repr__(self):
         return f"<Liquid: {self.id}>"
 
 
-class LiquidMethod(Base):
-    __tablename__ = "liquid_method"
+class Controller(Base):
+    __tablename__ = "controller"
     id = Column(Integer, primary_key=True)
     name = Column(String(50), unique=True)
 
@@ -51,4 +51,4 @@ class LiquidMethod(Base):
         self.name = name
 
     def __repr__(self):
-        return f"<Liquid Method: {self.name}>"
+        return f"<Controller: {self.name}>"

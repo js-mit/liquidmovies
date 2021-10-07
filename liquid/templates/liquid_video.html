@@ -4,29 +4,29 @@
 
     <script>
         const liquid = {{ liquid.liquid | safe }};
-        const method = {{ liquid.method_id | safe }};
+        const controller = {{ liquid.controller_id | safe }};
     </script>
     <script src="{{ url_for('static', filename='js/player.js') }}"></script>
 
     {% include 'snippets/video.html' %}
 
-    {% if liquid.method_id == 1 %}
+    {% if liquid.controller_id == 1 %}
     {% include 'controllers/segments.html' %}
     <script src="{{ url_for('static', filename='js/controllers/segments.js') }}"></script>
     {% endif %}
 
-    {% if liquid.method_id == 2 %}
+    {% if liquid.controller_id == 2 %}
     {% include 'controllers/heatgraph.html' %}
     <script src="{{ url_for('static', filename='js/controllers/heatgraph.js') }}"></script>
     {% endif %}
 
-    {% if liquid.method_id == 3 %}
+    {% if liquid.controller_id == 3 %}
     {% include 'controllers/markers.html' %}
     <script src="{{ url_for('static', filename='js/controllers/markers.js') }}"></script>
     {% endif %}
 
     {#
-    {% if liquid.method_id == 2 %}
+    {% if liquid.controller_id == 2 %}
         <hr>
         <div class="update-speakers"></div>
         <button class="submit-new-speakers" type="submit" data-action="{{ url_for('diarization_labels', video_id=video.id, liquid_id=liquid.id) }}">Submit</button>
@@ -40,7 +40,7 @@
         desc: {{ liquid.desc }}
     </div>
     <div class="vid-method">
-        method: {{ liquid.method }}
+        controller: {{ liquid.controller }}
     </div>
     <div class="vid-instructions">
         instructions: {{ liquid.liquid }}

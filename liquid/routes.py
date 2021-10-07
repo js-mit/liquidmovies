@@ -2,7 +2,7 @@ import json
 from flask import render_template, request, redirect, url_for, abort
 from flask import current_app as app
 from .database import db_session, init_db
-from .models import LiquidMethod, Liquid, Video
+from .models import Controller, Liquid, Video
 
 
 @app.route("/")
@@ -20,7 +20,7 @@ def raw_video(video_id):
     return render_template("raw_video.html", video=video)
 
 
-@app.route("/video/<int:video_id>/method/<int:liquid_id>")
+@app.route("/video/<int:video_id>/controller/<int:liquid_id>")
 def liquid_video(video_id, liquid_id):
     video = Video.query.filter(Video.id == video_id, Video.active == True).first()
     liquid = Liquid.query.filter(Liquid.id == liquid_id, Liquid.active == True).first()
@@ -34,7 +34,7 @@ def bookmarker(video_id):
     if request.method == "POST":
         bookmarks = request.form.get("bookmarks")
         desc = request.form.get("desc")
-        liquid = Liquid(video_id=video_id, liquid=bookmarks, method_id=1, desc=desc)
+        liquid = Liquid(video_id=video_id, liquid=bookmarks, controller_id=1, desc=desc)
         db_session.add(liquid)
         db_session.commit()
         return url_for("index")
@@ -49,7 +49,7 @@ def bookmarker(video_id):
 def diarization(video_id):
     bookmarks = request.form.get("bookmarks")
     desc = request.form.get("desc")
-    liquid = Liquid(video=video_id, liquid=bookmarks, method=2, desc=desc)
+    liquid = Liquid(video=video_id, liquid=bookmarks, controller=2, desc=desc)
     db_session.add(liquid)
     db_session.commit()
     return "ok"
@@ -72,7 +72,7 @@ def diarization_labels(video_id, liquid_id):
     # TODO check if remaining keys exist, then call error
 
     # update liquid entry
-    new_liquid = Liquid(video_id=video_id, liquid=bookmarks, method_id=liquid.method_id, desc=liquid.desc)
+    new_liquid = Liquid(video_id=video_id, liquid=bookmarks, controller_id=liquid.controller_id, desc=liquid.desc)
     liquid_id = new_liquid.id
     db_session.add(new_liquid)
     db_session.commit()

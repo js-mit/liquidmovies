@@ -2,7 +2,7 @@
 import json
 from pathlib import Path
 from liquid.database import db_session, init_db
-from liquid.models import LiquidMethod, Liquid, Video
+from liquid.models import Controller, Liquid, Video
 
 # Set the location of where to get data from. This vriable is subject to change
 # depending on where the data is located
@@ -41,18 +41,18 @@ v = Video(
 )
 db_session.add(v)
 
-m = LiquidMethod(name="bookmark")
-db_session.add(m)
-m = LiquidMethod(name="diarization")
-db_session.add(m)
-m = LiquidMethod(name="markers")
-db_session.add(m)
+c = Controller(name="bookmark")
+db_session.add(c)
+c = Controller(name="diarization")
+db_session.add(c)
+c = Controller(name="markers")
+db_session.add(c)
 
 instructions = '[{"start": 3, "stop": 5}, {"start": 20, "stop": 23}, {"start": 35, "stop": 38}]'
 l = Liquid(
     video_id=2,
     liquid=json.loads(instructions),
-    method_id=1,
+    controller_id=1,
     desc="fake bookmarks",
 )
 db_session.add(l)
@@ -61,7 +61,7 @@ instructions = '[{"start": 5, "stop": 10}]'
 l = Liquid(
     video_id=2,
     liquid=json.loads(instructions),
-    method_id=1,
+    controller_id=1,
     desc="another fake bookmark",
 )
 db_session.add(l)
@@ -74,21 +74,21 @@ instructions[25] = ["dog", "floor", "mouse"]
 l = Liquid(
     video_id=2,
     liquid=instructions,
-    method_id=3,
+    controller_id=3,
     desc="TEST markers on our vid",
 )
 db_session.add(l)
 
 with open(data_dir/"mit_covid_vaccine_lecture.json") as json_file:
     data = json.load(json_file)
-    l = Liquid(video_id=3, liquid=data, method_id=2, desc="diarization")
+    l = Liquid(video_id=3, liquid=data, controller_id=2, desc="diarization")
     db_session.add(l)
 with open(data_dir/"friendss3.json") as json_file:
     data = json.load(json_file)
-    l = Liquid(video_id=4, liquid=data, method_id=2, desc="diarization")
+    l = Liquid(video_id=4, liquid=data, controller_id=2, desc="diarization")
     db_session.add(l)
 with open(data_dir/"tucker_vs_stewart.json") as json_file:
     data = json.load(json_file)
-    l = Liquid(video_id=5, liquid=data, method_id=2, desc="diarization")
+    l = Liquid(video_id=5, liquid=data, controller_id=2, desc="diarization")
     db_session.add(l)
 db_session.commit()
