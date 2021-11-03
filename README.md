@@ -2,7 +2,7 @@
 Run this application through docker
 
 ```
-sudo docker run --name liquid -v /"$(pwd)":/home -v ~/scratch:/scratch -p 8000-9000:8000-9000 --shm-size=2gb --interactive --tty --rm python:3.9 bash
+sudo docker run --name liquid -v /"$(pwd)":/home -v ~/scratch:/scratch -p 8000-8009:8000-8009 --shm-size=2gb --interactive --tty --rm python:3.9 bash
 ```
 
 Interactive mode
