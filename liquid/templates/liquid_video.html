@@ -5,7 +5,9 @@
     <script>
         const liquid = {{ liquid.liquid | safe }};
         const controller = {{ liquid.controller_id | safe }};
+        const liquid_desc = "{{ liquid.desc | safe }}";
     </script>
+    <script src="{{ url_for('static', filename='js/util.js') }}"></script>
     <script src="{{ url_for('static', filename='js/player.js') }}"></script>
 
     {% include 'snippets/video.html' %}
@@ -25,15 +27,9 @@
     <script src="{{ url_for('static', filename='js/controllers/markers.js') }}"></script>
     {% endif %}
 
-    {#
-    {% if liquid.controller_id == 2 %}
-        <hr>
-        <div class="update-speakers"></div>
-        <button class="submit-new-speakers" type="submit" data-action="{{ url_for('diarization_labels', video_id=video.id, liquid_id=liquid.id) }}">Submit</button>
-    {% endif %}
-    #}
     <hr>
-    <h1>{% block title %} Video {{ video.id }} | Liquid {{ liquid.id }} {% endblock %}</h1>
+
+    <h1>{% block title %} {{ video.name }} {% endblock %}</h1>
 
     <hr>
     <div class="vid-desc">
