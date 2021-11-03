@@ -5,7 +5,7 @@ from liquid.database import db_session, init_db
 from liquid.models import Controller, Liquid, Video
 
 # Set the location of where to get data from. This vriable is subject to change
-# depending on where the data is located
+# depending on where the data is located (currently not in use)
 data_dir = Path.home().parent/"scratch"/"liquid_data"
 
 # set up database
