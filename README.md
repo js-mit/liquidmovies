@@ -1,11 +1,10 @@
 # set up docker
-Run this application through docker
-
+Run this application through docker container
 ```
-sudo docker run --name liquid -v /"$(pwd)":/home -v ~/scratch:/scratch -p 8000-8009:8000-8009 --shm-size=2gb --interactive --tty --rm python:3.9 bash
+sudo docker run --name liquid -v /"$(pwd)":/home -p 8000-8009:8000-8009 --shm-size=2gb --interactive --tty --rm python:3.9 bash
 ```
 
-Interactive mode
+In a seperate terminal, you can also enter the container via this command: 
 ```
 sudo docker exec -it liquid bash
 ```
