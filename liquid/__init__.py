@@ -1,6 +1,5 @@
 import os
 from flask import Flask
-from werkzeug.exceptions import abort
 
 
 def create_app(test_config=None):
