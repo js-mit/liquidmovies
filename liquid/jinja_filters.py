@@ -3,7 +3,7 @@ import json
 from flask import current_app as app
 
 
-@app.template_filter('render_timestamps')
+@app.template_filter("render_timestamps")
 def render_timestamps(data):
     return map_nested_objs(data, convert)
 

@@ -1,7 +1,7 @@
 import json
 from flask import render_template, request, redirect, url_for, abort
 from flask import current_app as app
-from .database import db_session, init_db
+from .db import db_session
 from .models import Controller, Liquid, Video
 
 
@@ -36,3 +36,8 @@ def delete_liquid(liquid_id):
     db_session.add(liquid)
     db_session.commit()
     return redirect(url_for("index"))
+
+
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db_session.remove()

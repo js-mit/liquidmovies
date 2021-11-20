@@ -1,7 +1,7 @@
 # load pipeline
 import torch
 
-if __name__=="__main__":
+if __name__ == "__main__":
     audio_file_path = "../../../scratch/liquid_data/tucker_vs_stewart.wav"
 
     pipeline = torch.hub.load("pyannote/pyannote-audio", "dia")

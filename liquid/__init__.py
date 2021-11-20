@@ -27,7 +27,6 @@ def create_app(test_config=None):
     with app.app_context():
         # Import parts of our application
         from . import routes
-        from . import database
         from . import models
         from . import jinja_filters
 
