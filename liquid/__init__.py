@@ -13,12 +13,10 @@ def create_app(test_config=None):
 
     if test_config is None:
         # load the instance config, if it exists, when not testing
-        app.config.from_pyfile("config.py", silent=True)
+        app.config.from_object("config.Prod")
     else:
         # load the test config if passed in
-        app.config.from_mapping(test_config)
-
-    print(app.config["SCRATCH"])
+        app.config.from_object("config.Dev")
 
     # ensure the instance folder exists
     try:
@@ -29,7 +27,6 @@ def create_app(test_config=None):
     with app.app_context():
         # Import parts of our application
         from . import routes
-        from . import database
         from . import models
         from . import jinja_filters
 

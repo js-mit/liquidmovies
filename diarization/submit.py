@@ -1,5 +1,6 @@
 import json
 
+
 def add_speaker_segment(speakers, speaker, start, stop):
     start = round(start)
     stop = round(stop)
@@ -10,6 +11,7 @@ def add_speaker_segment(speakers, speaker, start, stop):
         speakers[speaker].append({"start": start, "stop": stop})
 
     return speakers
+
 
 def create_speaker_segments(lines):
     speakers = {}
@@ -32,7 +34,9 @@ def create_speaker_segments(lines):
 
         if speaker is not curr_speaker:  # speaker changed
             curr_speaker_end = prev_end
-            speakers = add_speaker_segment(speakers, curr_speaker, curr_speaker_start, curr_speaker_end)
+            speakers = add_speaker_segment(
+                speakers, curr_speaker, curr_speaker_start, curr_speaker_end
+            )
             curr_speaker_start = start
 
         prev_start = start
@@ -40,11 +44,14 @@ def create_speaker_segments(lines):
         curr_speaker = speaker
 
     curr_speaker_end = prev_end
-    speakers = add_speaker_segment(speakers, curr_speaker, curr_speaker_start, curr_speaker_end)
+    speakers = add_speaker_segment(
+        speakers, curr_speaker, curr_speaker_start, curr_speaker_end
+    )
 
     return speakers
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     f = open("../../../scratch/liquid_data/tucker_vs_stewart.rttm", "r")
     lines = f.readlines()
 
