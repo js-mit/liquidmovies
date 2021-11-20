@@ -2,7 +2,7 @@
 import json
 from pathlib import Path
 from liquid.db import db_session, init_db
-from liquid.models import Controller, Liquid, Video
+from liquid.models import Controller, Liquid, Video, User
 
 init_db()
 

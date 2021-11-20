@@ -1,5 +1,9 @@
 import os
 from flask import Flask
+from flask_login import LoginManager
+
+
+login_manager = LoginManager()
 
 
 def create_app(test_config=None):
@@ -24,10 +28,14 @@ def create_app(test_config=None):
     except OSError:
         pass
 
+    # init plugins
+    login_manager.init_app(app)
+
     with app.app_context():
         # Import parts of our application
         from . import routes
         from . import models
         from . import jinja_filters
+        from . import auth
 
         return app
