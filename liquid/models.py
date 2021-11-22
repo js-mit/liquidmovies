@@ -28,7 +28,8 @@ class User(UserMixin, Base):
         DateTime, index=False, unique=False, nullable=False, server_default=func.now()
     )
     last_login = Column(DateTime, index=False, unique=False, nullable=True)
-    videos = relationship("Video", backref="user")
+
+    liquids = relationship("Liquid", backref="user")
 
     def set_password(self, password):
         """Create hashed password."""
@@ -39,7 +40,7 @@ class User(UserMixin, Base):
         return check_password_hash(self.password, password)
 
     def __repr__(self):
-        return "<User {}>".format(self.username)
+        return "<User {}>".format(self.email)
 
 
 class Video(Base):
@@ -50,10 +51,10 @@ class Video(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(200), nullable=False)
     time_created = Column(DateTime(timezone=True), server_default=func.now())
-    user_id = Column(Integer, ForeignKey("user.id"))
     url = Column(String, nullable=False)
     poster = Column(String, nullable=True)
     active = Column(Boolean, unique=False, default=True)
+    private = Column(Boolean, default=False)
 
     def __repr__(self):
         return f"<Video: {self.name} | {self.url}>"
@@ -67,10 +68,13 @@ class Liquid(Base):
     id = Column(Integer, primary_key=True)
     time_created = Column(DateTime(timezone=True), server_default=func.now())
     video_id = Column(Integer, ForeignKey("video.id"))
+    user_id = Column(Integer, ForeignKey("user.id"))
     liquid = Column(JSON, nullable=False)
     controller_id = Column(Integer, ForeignKey("controller.id"))
     desc = Column(Text, nullable=True)
     active = Column(Boolean, unique=False, default=True)
+    private = Column(Boolean, default=False)
+
     controller = relationship("Controller", backref="liquids")
     video = relationship("Video", backref="liquids")
 

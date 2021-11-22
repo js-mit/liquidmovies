@@ -81,10 +81,18 @@ def login():
     )
 
 
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("index"))
+
+
 @login_manager.user_loader
 def user_loader(user_id):
     """Given *user_id*, return the associated User object.
 
+    Arugs:
     :param unicode user_id: user_id (email) user to retrieve
 
     """
