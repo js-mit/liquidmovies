@@ -22,6 +22,7 @@ db_session = scoped_session(
 )
 
 Base = declarative_base()
+Base.metadata.schema = 'public'
 Base.query = db_session.query_property()
 
 
@@ -31,5 +32,3 @@ def init_db():
     # you will have to import them first before calling init_db()
     from . import models
     Base.metadata.create_all(bind=engine)
-
-
