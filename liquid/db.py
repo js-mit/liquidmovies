@@ -13,7 +13,7 @@ load_dotenv(os.path.join(basedir, "..", ".env"))
 # otherwise default to a local instance of a sqlite db
 db_path = (
     os.environ.get("DATABASE_URL")
-    if "DATABSE_URL" in os.environ
+    if "DATABASE_URL" in os.environ
     else "sqlite:///" + str(Path(__file__).parent.parent / "instance/liquid.db")
 )
 

@@ -33,17 +33,6 @@ db_session.add_all([v1, v2, v3])
 
 
 """
-Create a user
-"""
-u = User(email="tester1@gmail.com")
-u.set_password("viralviral")
-u.videos.append(v1)
-u.videos.append(v2)
-u.videos.append(v3)
-db_session.add(u)
-
-
-"""
 Create Controllers
 TODO - should this be here or in the application layer?
 """
@@ -190,5 +179,17 @@ l3 = Liquid(
     video_id=3, liquid=instructions, controller_id=3, desc="Our Planet ctrlf im search"
 )
 db_session.add_all([l1, l2, l3])
+
+
+"""
+Create a user
+"""
+u = User(email="tester1@gmail.com")
+u.set_password("viralviral")
+u.liquids.append(l1)
+u.liquids.append(l2)
+u.liquids.append(l3)
+db_session.add(u)
+
 
 db_session.commit()

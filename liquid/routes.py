@@ -1,15 +1,33 @@
 import json
 from flask import render_template, request, redirect, url_for, abort
 from flask import current_app as app
+from flask_login import current_user, login_required
 from .db import db_session
 from .models import Controller, Liquid, Video
 
 
 @app.route("/")
 def index():
-    videos = Video.query.filter(Video.active == True).all()
-    liquids = Liquid.query.filter(Liquid.active == True).all()
-    return render_template("index.html", videos=videos, liquids=liquids)
+    if not current_user.is_authenticated:
+        print(current_user)
+    else:
+        print(current_user.id)
+
+    liquids = Liquid.query.filter(
+        (Liquid.active == True),
+        (Liquid.private == False),
+    ).all()
+    return render_template("index.html", liquids=liquids)
+
+
+@app.route("/profile")
+@login_required
+def profile():
+    liquids = Liquid.query.filter(
+        (Liquid.active == True),
+        (Liquid.user_id == current_user.id),
+    ).all()
+    return render_template("profile.html", liquids=liquids)
 
 
 @app.route("/video/<int:video_id>")
