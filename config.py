@@ -18,6 +18,12 @@ class Prod(Config):
     TESTING = False
 
 
+class Staging(Config):
+    FLASK_ENV = "development"
+    DEBUG = True
+    Testing = True
+
+
 class Dev(Config):
     FLASK_ENV = "development"
     DEBUG = True

@@ -2,52 +2,70 @@
 import json
 from pathlib import Path
 from liquid.db import db_session, init_db
-from liquid.models import Controller, Liquid, Video
+from liquid.models import Controller, Liquid, Video, User
 
+"""
+Initalize DB
+This creates the schemas for all the tables
+"""
 init_db()
 
-# id = 1
-v = Video(
+
+"""
+Create Videos
+"""
+v1 = Video(
     url="https://liquidmovies.s3.amazonaws.com/mit_covid_vaccines_lecture.mp4",
     name="mit covid lecture",
     poster="//vjs.zencdn.net/v/oceans.png",
 )
-db_session.add(v)
-# id = 2
-v = Video(
+v2 = Video(
     url="https://liquidmovies.s3.amazonaws.com/polisci-lecture.mp4",
     name="Introduction to Power and Politics in Today’s World",
     poster="https://liquidmovies.s3.amazonaws.com/polisci-lecture_poster.png",
 )
-db_session.add(v)
-# id = 3
-v = Video(
+v3 = Video(
     url="https://liquidmovies.s3.amazonaws.com/Our+Planet%2C+From+Deserts+to+Grasslands+(Netflix).mp4",
     name="Our Planet - From Deserts to Grasslands (Netflix)",
     poster="https://liquidmovies.s3.amazonaws.com/our_planet+poster.png",
 )
-db_session.add(v)
+db_session.add_all([v1, v2, v3])
 
 
-# Controllers
-c = Controller(name="segments")
-db_session.add(c)
-c = Controller(name="diarization")
-db_session.add(c)
-c = Controller(name="markers")
-db_session.add(c)
+"""
+Create a user
+"""
+u = User(email="tester1@gmail.com")
+u.set_password("viralviral")
+u.videos.append(v1)
+u.videos.append(v2)
+u.videos.append(v3)
+db_session.add(u)
 
+
+"""
+Create Controllers
+TODO - should this be here or in the application layer?
+"""
+c1 = Controller(name="segments")
+c2 = Controller(name="diarization")
+c3 = Controller(name="markers")
+db_session.add_all([c1, c2, c3])
+
+
+"""
+Create Liquids
+"""
 instructions = [0] * 46
 instructions[1:8] = [1] * 7
 instructions[15:22] = [1] * 6
 instructions[36:46] = [1] * 9
-l = Liquid(
+l1 = Liquid(
     video_id=1,
     liquid=instructions,
     controller_id=1,
     desc="fake bookmarks",
 )
-db_session.add(l)
 
 # liquids
 instructions = [[""]] * 3374
@@ -75,8 +93,7 @@ instructions[2910] = ["government", "america"]
 instructions[2978] = ["america", "politics"]
 instructions[3118] = ["cold war", "floor", "america"]
 instructions[3200] = ["cold war", "floor", "america", "ussr"]
-l = Liquid(video_id=2, liquid=instructions, controller_id=3, desc="Polisci lecture")
-db_session.add(l)
+l2 = Liquid(video_id=2, liquid=instructions, controller_id=3, desc="Polisci lecture")
 
 instructions = [[""]] * 3054
 instructions[958] = [
@@ -169,9 +186,9 @@ instructions[2034] = [
 instructions[2039] = [
     "https://liquidmovies.s3.amazonaws.com/ctrlf_imgs+(our_planet)/butterfly_13.png"
 ]
-l = Liquid(
+l3 = Liquid(
     video_id=3, liquid=instructions, controller_id=3, desc="Our Planet ctrlf im search"
 )
-db_session.add(l)
+db_session.add_all([l1, l2, l3])
 
 db_session.commit()
