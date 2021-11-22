@@ -37,9 +37,11 @@ flask run --port 8000 --host=0.0.0.0
 ```
 
 ## Sqlite
+This application will default to using a local instance of sqlite as a database if a DATABASE_URL is not defined as a environment variable.
+
 sqlite db commands must be run through docker otherwise you will encounter permission errors
 
-sqlite3 interactive must be run *outside* of docker because it is not installed
+> sqlite3 interactive must be run *outside* of docker because it is not installed
 in docker container (i think bc of python slim version)
 
 ```
