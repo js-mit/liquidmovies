@@ -8,9 +8,7 @@ from .models import Controller, Liquid, Video
 
 @app.route("/")
 def index():
-    if not current_user.is_authenticated:
-        print(current_user)
-    else:
+    if current_user.is_authenticated:
         print(current_user.id)
 
     liquids = Liquid.query.filter(
@@ -38,13 +36,14 @@ def raw_video(video_id):
     return render_template("raw_video.html", video=video)
 
 
-@app.route("/video/<int:video_id>/liquid/<int:liquid_id>")
-def liquid_video(video_id, liquid_id):
-    video = Video.query.filter(Video.id == video_id, Video.active == True).first()
+@app.route("/liquid/<int:liquid_id>")
+def liquid(liquid_id):
+    """TODO"""
     liquid = Liquid.query.filter(Liquid.id == liquid_id, Liquid.active == True).first()
-    if video is None or liquid is None:
+    if liquid is None:
         abort(404)
-    return render_template("liquid_video.html", video=video, liquid=liquid)
+
+    return render_template("liquid.html", liquid=liquid)
 
 
 @app.route("/liquid/delete/<int:liquid_id>")
