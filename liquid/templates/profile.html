@@ -1,13 +1,17 @@
 {% extends 'base.html' %}
 
+{% block title %}
+    Profile
+{% endblock %}
+
 {% block content %}
-    <h1>{% block title %} Your Liquid Videos {% endblock %}</h1>
+
     <div>{{ current_user.email }}</div>
 
-    <h2>Liquids</h2>
+    <h2>Your Liquid Videos</h2>
     {% for liquid in liquids %}
     <div>
-        <a href="{{ url_for('liquid_video', video_id=liquid.video_id, liquid_id=liquid.id) }}">
+        <a href="{{ url_for('liquid', liquid_id=liquid.id) }}">
             Liquid: {{ liquid.id }} | Video: {{ liquid.video }} | Controller: {{ liquid.controller }} | Desc: {{ liquid.desc }} | User: {{ liquid.user_id }}
         </a>
     </div>

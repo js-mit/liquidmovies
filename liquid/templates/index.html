@@ -1,21 +1,17 @@
 {% extends 'base.html' %}
 
-{% block content %}
-    <h1>{% block title %} Liquid Movies {% endblock %}</h1>
+{% block title %}Home{% endblock %}
 
-    <h2>Liquids</h2>
-    {% for liquid in liquids %}
-    <div>
-        <a href="{{ url_for('liquid_video', video_id=liquid.video_id, liquid_id=liquid.id) }}">
-            Liquid: {{ liquid.id }} | Video: {{ liquid.video }} | Controller: {{ liquid.controller }} | Desc: {{ liquid.desc }} | User: {{ liquid.user_id }}
-        </a>
-    </div>
-    <div>
-        <a href="{{ url_for('delete_liquid',  liquid_id=liquid.id) }}">
-            (del)
-        </a>
-    </div>
-    <hr>
-    {% endfor %}
+{% block content %}
+<h2>Videos</h2>
+
+{% for liquid in liquids %}
+<div>
+    <a href="{{ url_for('liquid', liquid_id=liquid.id) }}">
+        Liquid: {{ liquid.id }} | Video: {{ liquid.video }} | Controller: {{ liquid.controller }} | Desc: {{ liquid.desc }} | User: {{ liquid.user_id }}
+    </a>
+</div>
+<hr>
+{% endfor %}
 
 {% endblock %}

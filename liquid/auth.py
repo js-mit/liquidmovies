@@ -39,7 +39,7 @@ def signup():
             db_session.add(user)
             db_session.commit()  # Create new user
             login_user(user)  # Log in as newly created user
-            return redirect(url_for("index"))
+            return redirect(url_for("profile"))
         flash("A user already exists with that email address.")
     return render_template(
         "signup.html",
@@ -60,7 +60,7 @@ def login():
     """
     # Bypass if user is logged in
     if current_user.is_authenticated:
-        return redirect(url_for("index"))
+        return redirect(url_for("profile"))
 
     form = LoginForm()
     # Validate login attempt
