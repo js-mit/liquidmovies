@@ -3,17 +3,17 @@
 {% block js %}
     <script>
         const liquid = {{ liquid.liquid | safe }};
-        const controller = {{ liquid.controller_id | safe }};
-        const liquid_desc = "{{ liquid.desc | safe }}";
+        const treatment = {{ liquid.treatment_id | safe }};
+        const liquid_desc = "{{ liquid.video.desc | safe }}";
     </script>
     <script src="{{ url_for('static', filename='js/util.js') }}"></script>
     <script src="{{ url_for('static', filename='js/player.js') }}"></script>
 
-    {% if liquid.controller_id == 1 %}
+    {% if liquid.treatment.controller_id == 1 %}
     <script src="{{ url_for('static', filename='js/controllers/segments.js') }}"></script>
-    {% elif liquid.controller_id == 2 %}
+    {% elif liquid.treatment.controller_id == 2 %}
     <script src="{{ url_for('static', filename='js/controllers/heatgraph.js') }}"></script>
-    {% elif liquid.controller_id == 3 %}
+    {% elif liquid.treatment.controller_id == 3 %}
     <script src="{{ url_for('static', filename='js/controllers/markers.js') }}"></script>
     {% endif %}
 
@@ -27,11 +27,11 @@
 
     {% include 'snippets/video.html' %}
 
-    {% if liquid.controller_id == 1 %}
+    {% if liquid.treatment.controller_id == 1 %}
     {% include 'controllers/segments.html' %}
-    {% elif liquid.controller_id == 2 %}
+    {% elif liquid.treatment.controller_id == 2 %}
     {% include 'controllers/heatgraph.html' %}
-    {% elif liquid.controller_id == 3 %}
+    {% elif liquid.treatment.controller_id == 3 %}
     {% include 'controllers/markers.html' %}
     {% endif %}
 
@@ -42,10 +42,10 @@
     <hr>
 
     <div class="vid-desc">
-        desc: {{ liquid.desc }}
+        desc: {{ liquid.video.desc }}
     </div>
     <div class="vid-method">
-        controller: {{ liquid.controller }}
+        treatment: {{ liquid.treatment }}
     </div>
     <div class="vid-instructions">
         instructions: {{ liquid.liquid }}
