@@ -41,6 +41,7 @@ def signup():
             login_user(user)  # Log in as newly created user
             return redirect(url_for("profile"))
         flash("A user already exists with that email address.")
+
     return render_template(
         "signup.html",
         title="Create an Account.",
@@ -72,6 +73,7 @@ def login():
             return redirect(next_page or url_for("index"))
         flash("Invalid username/password combination")
         return redirect(url_for("login"))
+
     return render_template(
         "login.html",
         form=form,

@@ -6,6 +6,18 @@
 
 {% block content %}
 
+    {% for message in get_flashed_messages() %}
+      <div class="alert alert-warning">
+        <button
+          type="button"
+          class="close"
+          data-dismiss="alert">
+            x
+          </button>
+        {{ message }}
+      </div>
+    {% endfor %}
+
     <div>{{ current_user.email }}</div>
 
     <h2>Your Liquid Videos</h2>

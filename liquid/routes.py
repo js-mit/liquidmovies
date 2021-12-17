@@ -1,9 +1,10 @@
 import json
-from flask import render_template, request, redirect, url_for, abort
+from flask import render_template, request, redirect, url_for, abort, flash
 from flask import current_app as app
 from flask_login import current_user, login_required
 from .db import db_session
-from .models import Controller, Liquid, Video
+from .models import Controller, Liquid, Video, Treatment
+from .forms import UploadVideoForm
 
 
 @app.route("/")
@@ -47,6 +48,7 @@ def liquid(liquid_id):
 
 
 @app.route("/liquid/delete/<int:liquid_id>")
+@login_required
 def delete_liquid(liquid_id):
     liquid = Liquid.query.filter(Liquid.id == liquid_id).first()
     liquid.active = False
@@ -56,13 +58,28 @@ def delete_liquid(liquid_id):
 
 
 @app.route("/liquid/upload", methods=["GET", "POST"])
+@login_required
 def upload_liquid():
-    """TODO"""
-    if flask.request.method == 'POST':
-        # TODO
-        return None
-    else:
-        return render_template("upload.html")
+    """Uploads liquid
+    POST:
+        1. Upload video to aws s3 and get video s3 url
+        2. Create Video entry
+        3. Create Liquid entry
+        4. save to db
+    GET:
+        render upload page
+    """
+    form = UploadVideoForm()
+    treatments = Treatment.query.all()
+    treatment_options = [(treatment.id, treatment.name) for treatment in treatments]
+    form.treatment_id.choices = treatment_options
+    if form.validate_on_submit():
+        print("VALIDATED")
+        # form.video.data
+        flash("Your video <VIDEO> has been successfully uploaded.")
+        return redirect(url_for("profile"))
+
+    return render_template("upload.html", form=form)
 
 
 @app.teardown_appcontext

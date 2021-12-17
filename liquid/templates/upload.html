@@ -20,39 +20,72 @@
       </div>
     {% endfor %}
 
-    <h1>Sign Up</h1>
+    <h1>Upload Video</h1>
 
-    <form method="POST" action="/signup">
+    <form method="POST" action="/liquid/upload" enctype="multipart/form-data">
       {{ form.csrf_token }}
 
-      <fieldset class="email">
-        {{ form.email.label }}
-        {{ form.email(placeholder='youremail@example.com') }}
-        {% if form.email.errors %}
+      <fieldset class="">
+        {{ form.name.label }}
+        {{ form.name(placeholder='Andy Smith') }}
+        {% if form.name.errors %}
           <ul class="errors">
-            {% for error in form.email.errors %}
+            {% for error in form.name.errors %}
               <li>{{ error }}</li>{% endfor %}
           </ul>
         {% endif %}
       </fieldset>
 
-      <fieldset class="password">
-        {{ form.password.label }}
-        {{ form.password }}
-        {% if form.password.errors %}
+      <fieldset class="">
+        {{ form.poster.label }}
+        {{ form.poster }}
+        {% if form.poster.errors %}
           <ul class="errors">
-            {% for error in form.password.errors %}
+            {% for error in form.poster.errors %}
               <li>{{ error }}</li>{% endfor %}
           </ul>
         {% endif %}
       </fieldset>
 
-      <fieldset class="confirm">
-        {{ form.confirm.label }}
-        {{ form.confirm }}
-        {% if form.confirm.errors %}
+      <fieldset class="">
+        {{ form.video.label }}
+        {{ form.video }}
+        {% if form.video.errors %}
           <ul class="errors">
-            {% for error in form.confirm.errors %}
+            {% for error in form.video.errors %}
+              <li>{{ error }}</li>{% endfor %}
+          </ul>
+        {% endif %}
+      </fieldset>
+
+      <fieldset class="">
+        {{ form.desc.label }}
+        {{ form.desc }}
+        {% if form.desc.errors %}
+          <ul class="errors">
+            {% for error in form.desc.errors %}
+              <li>{{ error }}</li>{% endfor %}
+          </ul>
+        {% endif %}
+      </fieldset>
+
+      <fieldset class="">
+        {{ form.treatment_id.label }}
+        {{ form.treatment_id }}
+        {% if form.treatment_id.errors %}
+          <ul class="errors">
+            {% for error in form.treatment_id.errors %}
+              <li>{{ error }}</li>{% endfor %}
+          </ul>
+        {% endif %}
+      </fieldset>
+
+      <fieldset class="">
+        {{ form.private.label }}
+        {{ form.private }}
+        {% if form.private.errors %}
+          <ul class="errors">
+            {% for error in form.private.errors %}
               <li>{{ error }}</li>{% endfor %}
           </ul>
         {% endif %}
@@ -64,12 +97,6 @@
 
     </form>
 
-    <div class="login-signup">
-      <div>
-        <span>Already have an account?</span>
-        <a href="{{ url_for('login') }}">Log in.</a>
-      </div>
-    </div>
   </div>
 
 {% endblock %}

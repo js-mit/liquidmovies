@@ -1,8 +1,22 @@
 """Sign-up & log-in forms."""
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileRequired
-from wtforms import StringField, PasswordField, SubmitField, BooleanField
-from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional, URL
+from flask_wtf.file import FileField, FileRequired, FileAllowed
+from wtforms import (
+    StringField,
+    PasswordField,
+    SubmitField,
+    BooleanField,
+    SelectField,
+    TextAreaField,
+)
+from wtforms.validators import (
+    DataRequired,
+    Email,
+    EqualTo,
+    Length,
+    Optional,
+    InputRequired,
+)
 
 
 class UploadVideoForm(FlaskForm):
@@ -14,18 +28,30 @@ class UploadVideoForm(FlaskForm):
     )
     poster = FileField(
         "Poster",
-        validators=[FileRequired("File was empty!")],
+        validators=[
+            FileRequired("Poster file was empty!"),
+            FileAllowed(["png", "jpg"], "Wrong format. Must be .png or .jpg"),
+        ],
+    )
+    desc = TextAreaField(
+        "Description",
+        validators=[Optional()],
+    )
+    video = FileField(
+        "Video",
+        validators=[
+            FileRequired("Video file was empty!"),
+            FileAllowed(["mp4"], "Wrong format. Must be .mp4"),
+        ],
+    )
+    treatment_id = SelectField(
+        "Treatment",
+        coerce=int,
+        choices=[InputRequired()],
     )
     private = BooleanField(
         "Private?",
-        validators=[DataRequired()],
-    )
-    url = StringField(
-        "Video URL",
-        validators=[
-            URL(True, "Invalid URL"),
-            DataRequired(),
-        ]
+        validators=[],
     )
     submit = SubmitField("Upload")
 
