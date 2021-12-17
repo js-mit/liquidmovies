@@ -4,3 +4,4 @@ flask-wtf>=1.0.0
 SQLAlchemy>=1.4.9
 psycopg2>=2.9.2
 python-dotenv>=0.19.2
+email-validator>=1.1.3
