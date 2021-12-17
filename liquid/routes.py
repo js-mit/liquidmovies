@@ -55,6 +55,16 @@ def delete_liquid(liquid_id):
     return redirect(url_for("index"))
 
 
+@app.route("/liquid/upload", methods=["GET", "POST"])
+def upload_liquid():
+    """TODO"""
+    if flask.request.method == 'POST':
+        # TODO
+        return None
+    else:
+        return render_template("upload.html")
+
+
 @app.teardown_appcontext
 def shutdown_session(exception=None):
     db_session.remove()

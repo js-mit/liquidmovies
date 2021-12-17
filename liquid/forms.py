@@ -1,7 +1,33 @@
 """Sign-up & log-in forms."""
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional
+from flask_wtf.file import FileField, FileRequired
+from wtforms import StringField, PasswordField, SubmitField, BooleanField
+from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional, URL
+
+
+class UploadVideoForm(FlaskForm):
+    """Upload Video Form."""
+
+    name = StringField(
+        "Name",
+        validators=[Length(min=3), DataRequired()],
+    )
+    poster = FileField(
+        "Poster",
+        validators=[FileRequired("File was empty!")],
+    )
+    private = BooleanField(
+        "Private?",
+        validators=[DataRequired()],
+    )
+    url = StringField(
+        "Video URL",
+        validators=[
+            URL(True, "Invalid URL"),
+            DataRequired(),
+        ]
+    )
+    submit = SubmitField("Upload")
 
 
 class SignupForm(FlaskForm):

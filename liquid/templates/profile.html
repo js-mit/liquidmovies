@@ -16,11 +16,13 @@
         </a>
     </div>
     <div>
-        <a href="{{ url_for('delete_liquid',  liquid_id=liquid.id) }}">
+        <a href="{{ url_for('delete_liquid', liquid_id=liquid.id) }}">
             (del)
         </a>
     </div>
     <hr>
     {% endfor %}
+
+    <a href="{{ url_for('upload_liquid') }}"><button>Upload Video</button></a>
 
 {% endblock %}
