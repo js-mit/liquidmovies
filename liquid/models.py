@@ -50,6 +50,7 @@ class Video(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(200), nullable=False)
+    desc = Column(Text, nullable=True)
     time_created = Column(DateTime(timezone=True), server_default=func.now())
     url = Column(String, nullable=False)
     poster = Column(String, nullable=True)
@@ -70,16 +71,30 @@ class Liquid(Base):
     video_id = Column(Integer, ForeignKey("video.id"))
     user_id = Column(Integer, ForeignKey("user.id"))
     liquid = Column(JSON, nullable=False)
-    controller_id = Column(Integer, ForeignKey("controller.id"))
-    desc = Column(Text, nullable=True)
+    treatment_id = Column(Integer, ForeignKey("treatment.id"))
     active = Column(Boolean, unique=False, default=True)
     private = Column(Boolean, default=False)
-
-    controller = relationship("Controller", backref="liquids")
+    treatment = relationship("Treatment", backref="liquids")
     video = relationship("Video", backref="liquids")
 
     def __repr__(self):
         return f"<Liquid: {self.id}>"
+
+
+class Treatment(Base):
+    """ TODO """
+
+    __tablename__ = "treatment"
+
+    id = Column(Integer, primary_key=True)
+    time_created = Column(DateTime(timezone=True), server_default=func.now())
+    controller_id = Column(Integer, ForeignKey("controller.id"))
+    name = Column(String(200), nullable=False)
+    desc = Column(Text, nullable=True)
+    controller = relationship("Controller", backref="treatments")
+
+    def __repr__(self):
+        return f"<Treatment: {self.id} | {self.name}>"
 
 
 class Controller(Base):
@@ -89,10 +104,6 @@ class Controller(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(50), unique=True)
-
-    # TODO delete this?
-    def __init__(self, name=None):
-        self.name = name
 
     def __repr__(self):
         return f"<Controller: {self.name}>"
