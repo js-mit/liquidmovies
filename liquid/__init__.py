@@ -37,5 +37,6 @@ def create_app(test_config=None):
         from . import models
         from . import jinja_filters
         from . import auth
+        from . import aws
 
         return app

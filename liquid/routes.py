@@ -1,10 +1,12 @@
 import json
+from pathlib import Path
 from flask import render_template, request, redirect, url_for, abort, flash
 from flask import current_app as app
 from flask_login import current_user, login_required
 from .db import db_session
 from .models import Controller, Liquid, Video, Treatment
 from .forms import UploadVideoForm
+from .aws import upload_file
 
 
 @app.route("/")
@@ -74,8 +76,48 @@ def upload_liquid():
     treatment_options = [(treatment.id, treatment.name) for treatment in treatments]
     form.treatment_id.choices = treatment_options
     if form.validate_on_submit():
-        print("VALIDATED")
-        # form.video.data
+        video = form.video.data
+        success = upload_file(
+            file_obj=form.video.data,
+            bucket=app.config["AWS_S3_BUCKET"],
+            path=f"{current_user.id}/{form.name.data}",
+            content_type="video/mp4",
+            ext="mp4",
+            object_name="video",
+        )
+        if not success:
+            flash("Upload Video failed.")
+
+        ext = Path(form.poster.data.filename).suffix
+        ext = "png" if "png" in ext else "jpeg"
+        success = upload_file(
+            file_obj=form.poster.data,
+            bucket=app.config["AWS_S3_BUCKET"],
+            path=f"{current_user.id}/{form.name.data}",
+            content_type="image/{ext}",
+            ext=ext,
+            object_name="poster",
+        )
+        if not success:
+            flash("Upload poster failed.")
+
+        video_url = f"https://{app.config['AWS_S3_BUCKET']}.s3.amazonaws.com/{current_user.id}/{form.name.data}/video.mp4"
+        poster_url = f"https://{app.config['AWS_S3_BUCKET']}.s3.amazonaws.com/{current_user.id}/{form.name.data}/poster.{ext}"
+        v = Video(
+            url=video_url, name=form.name.data, poster=poster_url, desc=form.desc.data
+        )
+        db_session.add(v)
+        db_session.commit()
+        l = Liquid(
+            video_id=v.id,
+            user_id=current_user.id,
+            liquid=None,
+            treatment_id=form.treatment_id.data,
+            active=True,
+            private=form.private.data,
+        )
+        db_session.add(l)
+        db_session.commit()
         flash("Your video <VIDEO> has been successfully uploaded.")
         return redirect(url_for("profile"))
 
