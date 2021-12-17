@@ -8,7 +8,7 @@
 {% for liquid in liquids %}
 <div>
     <a href="{{ url_for('liquid', liquid_id=liquid.id) }}">
-        Liquid: {{ liquid.id }} | Video: {{ liquid.video }} | Controller: {{ liquid.controller }} | Desc: {{ liquid.desc }} | User: {{ liquid.user_id }}
+        Liquid: {{ liquid.id }} | Video: {{ liquid.video }} | Treatment: {{ liquid.treatment }} | Desc: {{ liquid.video.desc }} | User: {{ liquid.user_id }}
     </a>
 </div>
 <hr>

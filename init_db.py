@@ -2,7 +2,7 @@
 import json
 from pathlib import Path
 from liquid.db import db_session, init_db
-from liquid.models import Controller, Liquid, Video, User
+from liquid.models import Controller, Liquid, Video, Treatment, User
 
 """
 Initalize DB
@@ -18,16 +18,19 @@ v1 = Video(
     url="https://liquidmovies.s3.amazonaws.com/mit_covid_vaccines_lecture.mp4",
     name="mit covid lecture",
     poster="//vjs.zencdn.net/v/oceans.png",
+    desc="A lecture by xyz about covid at the MIT Media Lab.",
 )
 v2 = Video(
     url="https://liquidmovies.s3.amazonaws.com/polisci-lecture.mp4",
     name="Introduction to Power and Politics in Today’s World",
     poster="https://liquidmovies.s3.amazonaws.com/polisci-lecture_poster.png",
+    desc="A lecture by xyz about political science at Yale.",
 )
 v3 = Video(
     url="https://liquidmovies.s3.amazonaws.com/Our+Planet%2C+From+Deserts+to+Grasslands+(Netflix).mp4",
     name="Our Planet - From Deserts to Grasslands (Netflix)",
     poster="https://liquidmovies.s3.amazonaws.com/our_planet+poster.png",
+    desc="Learn about all the animals on our planet. So amaze!",
 )
 db_session.add_all([v1, v2, v3])
 
@@ -43,6 +46,22 @@ db_session.add_all([c1, c2, c3])
 
 
 """
+Create Treatments
+"""
+t1 = Treatment(
+    name="text-search",
+    desc="ctrl-f with text using speech-to-text",
+    controller_id=3,
+)
+t2 = Treatment(
+    name="image-search",
+    desc="ctrl-f with images using default rekcognition-provided labels",
+    controller_id=3,
+)
+db_session.add_all([t1, t2])
+
+
+"""
 Create Liquids
 """
 instructions = [0] * 46
@@ -52,8 +71,7 @@ instructions[36:46] = [1] * 9
 l1 = Liquid(
     video_id=1,
     liquid=instructions,
-    controller_id=1,
-    desc="fake bookmarks",
+    treatment_id=1,
 )
 
 # liquids
@@ -82,7 +100,7 @@ instructions[2910] = ["government", "america"]
 instructions[2978] = ["america", "politics"]
 instructions[3118] = ["cold war", "floor", "america"]
 instructions[3200] = ["cold war", "floor", "america", "ussr"]
-l2 = Liquid(video_id=2, liquid=instructions, controller_id=3, desc="Polisci lecture")
+l2 = Liquid(video_id=2, liquid=instructions, treatment_id=1)
 
 instructions = [[""]] * 3054
 instructions[958] = [
@@ -175,9 +193,7 @@ instructions[2034] = [
 instructions[2039] = [
     "https://liquidmovies.s3.amazonaws.com/ctrlf_imgs+(our_planet)/butterfly_13.png"
 ]
-l3 = Liquid(
-    video_id=3, liquid=instructions, controller_id=3, desc="Our Planet ctrlf im search"
-)
+l3 = Liquid(video_id=3, liquid=instructions, treatment_id=2)
 db_session.add_all([l1, l2, l3])
 
 
