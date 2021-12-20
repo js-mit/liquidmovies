@@ -1,6 +1,6 @@
 from flask import current_app as app
 from flask_login import login_required, logout_user, current_user, login_user
-from flask import render_template, request, redirect, url_for, abort, flash, session
+from flask import render_template, request, redirect, url_for, flash
 from .forms import SignupForm, LoginForm
 from .db import db_session
 from .models import User

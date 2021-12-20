@@ -1,0 +1,11 @@
+[flake8]
+# H501: line too long
+# F401: x imported but not used
+max-line-length = 88
+ignore = H501
+exclude = .git, __pycache__
+per-file-ignores =
+    liquid/__init__.py: F401,
+    liquid/db.py: F401,
+    init_db.py: E501
+max-complexity = 10

@@ -1,6 +1,4 @@
 # Testing purposes only
-import json
-from pathlib import Path
 from liquid.db import db_session, init_db
 from liquid.models import Controller, Liquid, Video, Treatment, User
 
@@ -17,19 +15,19 @@ Create Videos
 v1 = Video(
     url="https://liquidmovies.s3.amazonaws.com/mit_covid_vaccines_lecture.mp4",
     name="mit covid lecture",
-    poster="//vjs.zencdn.net/v/oceans.png",
+    poster_url="//vjs.zencdn.net/v/oceans.png",
     desc="A lecture by xyz about covid at the MIT Media Lab.",
 )
 v2 = Video(
     url="https://liquidmovies.s3.amazonaws.com/polisci-lecture.mp4",
     name="Introduction to Power and Politics in Today’s World",
-    poster="https://liquidmovies.s3.amazonaws.com/polisci-lecture_poster.png",
+    poster_url="https://liquidmovies.s3.amazonaws.com/polisci-lecture_poster_url.png",
     desc="A lecture by xyz about political science at Yale.",
 )
 v3 = Video(
     url="https://liquidmovies.s3.amazonaws.com/Our+Planet%2C+From+Deserts+to+Grasslands+(Netflix).mp4",
     name="Our Planet - From Deserts to Grasslands (Netflix)",
-    poster="https://liquidmovies.s3.amazonaws.com/our_planet+poster.png",
+    poster_url="https://liquidmovies.s3.amazonaws.com/our_planet+poster_url.png",
     desc="Learn about all the animals on our planet. So amaze!",
 )
 db_session.add_all([v1, v2, v3])
