@@ -1,6 +1,6 @@
 from flask import current_app as app
 from flask_login import login_required, logout_user, current_user, login_user
-from flask import render_template, request, redirect, url_for, abort, flash, session
+from flask import render_template, request, redirect, url_for, flash
 from .forms import SignupForm, LoginForm
 from .db import db_session
 from .models import User
@@ -41,6 +41,7 @@ def signup():
             login_user(user)  # Log in as newly created user
             return redirect(url_for("profile"))
         flash("A user already exists with that email address.")
+
     return render_template(
         "signup.html",
         title="Create an Account.",
@@ -72,6 +73,7 @@ def login():
             return redirect(next_page or url_for("index"))
         flash("Invalid username/password combination")
         return redirect(url_for("login"))
+
     return render_template(
         "login.html",
         form=form,

@@ -12,7 +12,6 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import date
 from .db import Base
 
 
@@ -52,8 +51,8 @@ class Video(Base):
     name = Column(String(200), nullable=False)
     desc = Column(Text, nullable=True)
     time_created = Column(DateTime(timezone=True), server_default=func.now())
-    url = Column(String, nullable=False)
-    poster = Column(String, nullable=True)
+    url = Column(String, nullable=True)
+    poster_url = Column(String, nullable=True)
     active = Column(Boolean, unique=False, default=True)
     private = Column(Boolean, default=False)
 

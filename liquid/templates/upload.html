@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Upload Video
+{% endblock %}
+
+{% block content %}
+
+  <div class="form-wrapper">
+
+    {% for message in get_flashed_messages() %}
+      <div class="alert alert-warning">
+        <button
+          type="button"
+          class="close"
+          data-dismiss="alert">
+          x
+        </button>
+        {{ message }}
+      </div>
+    {% endfor %}
+
+    <h1>Upload Video</h1>
+
+    <form method="POST" action="/liquid/upload" enctype="multipart/form-data">
+      {{ form.csrf_token }}
+
+      <fieldset class="">
+        {{ form.name.label }}
+        {{ form.name(placeholder='My Video') }}
+        {% if form.name.errors %}
+          <ul class="errors">
+            {% for error in form.name.errors %}
+              <li>{{ error }}</li>{% endfor %}
+          </ul>
+        {% endif %}
+      </fieldset>
+
+      <fieldset class="">
+        {{ form.poster.label }}
+        {{ form.poster }}
+        {% if form.poster.errors %}
+          <ul class="errors">
+            {% for error in form.poster.errors %}
+              <li>{{ error }}</li>{% endfor %}
+          </ul>
+        {% endif %}
+      </fieldset>
+
+      <fieldset class="">
+        {{ form.video.label }}
+        {{ form.video }}
+        {% if form.video.errors %}
+          <ul class="errors">
+            {% for error in form.video.errors %}
+              <li>{{ error }}</li>{% endfor %}
+          </ul>
+        {% endif %}
+      </fieldset>
+
+      <fieldset class="">
+        {{ form.desc.label }}
+        {{ form.desc }}
+        {% if form.desc.errors %}
+          <ul class="errors">
+            {% for error in form.desc.errors %}
+              <li>{{ error }}</li>{% endfor %}
+          </ul>
+        {% endif %}
+      </fieldset>
+
+      <fieldset class="">
+        {{ form.treatment_id.label }}
+        {{ form.treatment_id }}
+        {% if form.treatment_id.errors %}
+          <ul class="errors">
+            {% for error in form.treatment_id.errors %}
+              <li>{{ error }}</li>{% endfor %}
+          </ul>
+        {% endif %}
+      </fieldset>
+
+      <fieldset class="">
+        {{ form.private.label }}
+        {{ form.private }}
+        {% if form.private.errors %}
+          <ul class="errors">
+            {% for error in form.private.errors %}
+              <li>{{ error }}</li>{% endfor %}
+          </ul>
+        {% endif %}
+      </fieldset>
+
+      <div class="submit-button">
+        {{ form.submit }}
+      </div>
+
+    </form>
+
+  </div>
+
+{% endblock %}
