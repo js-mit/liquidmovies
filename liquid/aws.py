@@ -37,3 +37,19 @@ def upload_file(file_obj, bucket, path, content_type, ext, object_name=None):
         logging.error(e)
         return False
     return True
+
+
+def get_object_url(path, filename):
+    """Get s3 object url
+    url structure: {bucket}.s3.amazonaws.com/{path}/{filename}
+
+    Args:
+        path: the object path
+        filanem: object filename
+    Return:
+        url in string
+    """
+    return (
+        f"https://{app.config['AWS_S3_BUCKET']}"
+        f".s3.amazonaws.com/{path}/{filename}"
+    )

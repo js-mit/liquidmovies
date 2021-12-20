@@ -5,13 +5,13 @@ from flask_login import current_user, login_required
 from .db import db_session
 from .models import Liquid, Video, Treatment
 from .forms import UploadVideoForm
-from .aws import upload_file
+from .aws import upload_file, get_object_url
 
 
 @app.route("/liquid/<int:liquid_id>")
 def liquid(liquid_id):
     """TODO"""
-    liquid = Liquid.query.filter(Liquid.id == liquid_id, Liquid.active is True).first()
+    liquid = Liquid.query.filter(Liquid.id == liquid_id, Liquid.active == True).first()
     if liquid is None:
         abort(404)
 
@@ -77,8 +77,8 @@ def upload_liquid():
         if not success:
             flash("Upload poster failed.")
 
-        video.url = f"https://{app.config['AWS_S3_BUCKET']}.s3.amazonaws.com/{OBJECT_PATH}/video.mp4"
-        video.poster_url = f"https://{app.config['AWS_S3_BUCKET']}.s3.amazonaws.com/{OBJECT_PATH}/poster.{ext}"
+        video.url = get_object_url(OBJECT_PATH, "video.mp4")
+        video.poster_url = get_object_url(OBJECT_PATH, f"poster.{ext}")
         db_session.add(video)
 
         liquid = Liquid(
@@ -92,7 +92,7 @@ def upload_liquid():
         db_session.add(liquid)
         db_session.commit()
 
-        flash(f"Your video '{form.name.data}'has been successfully uploaded.")
+        flash(f"Your video '{form.name.data}' has been successfully uploaded.")
         return redirect(url_for("profile"))
 
     return render_template("upload.html", form=form)

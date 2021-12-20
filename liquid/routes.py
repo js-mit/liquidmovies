@@ -11,8 +11,8 @@ def index():
         print(current_user.id)
 
     liquids = Liquid.query.filter(
-        (Liquid.active is True),
-        (Liquid.private is False),
+        (Liquid.active == True),
+        (Liquid.private == False),
     ).all()
     return render_template("index.html", liquids=liquids)
 
@@ -21,15 +21,15 @@ def index():
 @login_required
 def profile():
     liquids = Liquid.query.filter(
-        (Liquid.active is True),
-        (Liquid.user_id is current_user.id),
+        (Liquid.active == True),
+        (Liquid.user_id == current_user.id),
     ).all()
     return render_template("profile.html", liquids=liquids)
 
 
 @app.route("/video/<int:video_id>")
 def raw_video(video_id):
-    video = Video.query.filter(Video.id == video_id, Video.active is True).first()
+    video = Video.query.filter(Video.id == video_id, Video.active == True).first()
     if video is None:
         abort(404)
     return render_template("raw_video.html", video=video)
