@@ -36,6 +36,16 @@ Navigate to where the appplication is (`/home`) and run the app
 flask run --port 8000 --host=0.0.0.0
 ```
 
+## Dev standard
+
+This project uses [Black](https://black.readthedocs.io/en/stable/) and [flake8](https://flake8.pycqa.org/en/latest/) to standard python files
+
+Before committing code:
+- run `black .` on the root directory to reformat python files
+- run `flake8 .` on the root directory and resolve all issues
+
+> flake8 config can be found in `.flake8` in the root directory
+
 ## Sqlite
 This application will default to using a local instance of sqlite as a database if a DATABASE_URL is not defined as a environment variable.
 
