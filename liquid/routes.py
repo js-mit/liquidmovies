@@ -1,6 +1,8 @@
 from flask import render_template, abort
 from flask import current_app as app
 from flask_login import current_user, login_required
+
+from . import s3
 from .db import db_session
 from .models import Liquid, Video
 
@@ -24,6 +26,11 @@ def profile():
         (Liquid.active == True),
         (Liquid.user_id == current_user.id),
     ).all()
+
+    # testing only
+    l = Liquid.query.get(7)
+    data = s3.get_liquid_data(current_user.id, l.video.id, l.id)
+
     return render_template("profile.html", liquids=liquids)
 
 

@@ -40,26 +40,34 @@ def get_liquid_job(job_id):
     3. upload liquid entry
     """
     detector = VideoDetector(job_id)
-    if not detector.get_results():
-        liquid = Liquid.query.filter(Liquid.job_id == job_id).first()
 
+    # get results from rekognition
+    if not detector.get_results():
+
+        # get Liquid entry
+        liquid = Liquid.query.filter(Liquid.job_id == job_id).first()
         path = s3.get_s3_liquid_path(
             current_user.id, liquid.video.id, liquid.id
         )
         key = f"{path}/data.json"
-        if s3.upload(
+
+        # upload results as json file to s3
+        success = s3.upload(
             file_obj=detector.labels,
             bucket=app.config["AWS_S3_BUCKET"],
             key=key,
             content_type="application/json",
-        ):
-            liquid.processing = False
-            liquid.url = s3.get_object_url(key)
-            liquid.duration = detector.duration
-            db_session.add(liquid)
-            db_session.commit()
-        else:
+        )
+        if not success:
             print("ERROR")
+
+        # update liquid entry
+        liquid.processing = False
+        liquid.url = s3.get_object_url(key)
+        liquid.duration = detector.duration
+        db_session.add(liquid)
+        db_session.commit()
+
     return redirect(url_for("profile"))
 
 
@@ -76,43 +84,46 @@ def upload_liquid():
     GET:
         render upload page
     """
-
     form = UploadVideoForm()
     treatments = Treatment.query.all()
     treatment_options = [(treatment.id, treatment.name) for treatment in treatments]
     form.treatment_id.choices = treatment_options
     if form.validate_on_submit():
 
+        # create video entry
         video = Video(name=form.name.data, desc=form.desc.data)
         db_session.add(video)
         db_session.commit()
 
+        # get video id to use in s3_path
         s3_path = s3.get_s3_video_path(current_user.id, video.id)
 
+        # upload video
         success = s3.upload(
             file_obj=form.video.data,
-            bucket=app.config["AWS_S3_BUCKET"],
             key=f"{s3_path}/video.mp4",
             content_type="video/mp4",
         )
         if not success:
             flash("Upload Video failed.")
 
+        # upload poster, modify depending on suffix
         ext = Path(form.poster.data.filename).suffix
         ext = "png" if "png" in ext else "jpeg"
         success = s3.upload(
             file_obj=form.poster.data,
-            bucket=app.config["AWS_S3_BUCKET"],
             key=f"{s3_path}/poster.{ext}",
             content_type="image/{ext}",
         )
         if not success:
             flash("Upload poster failed.")
 
+        # update video entry with url/poster_url
         video.url = s3.get_object_url(f"{s3_path}/video.mp4")
         video.poster_url = s3.get_object_url(f"{s3_path}/poster.{ext}")
         db_session.add(video)
 
+        # create liquid entry
         liquid = Liquid(
             video_id=video.id,
             user_id=current_user.id,
@@ -125,6 +136,7 @@ def upload_liquid():
         db_session.add(liquid)
         db_session.commit()
 
+        # submit video to aws rekognition
         submitter = VideoSubmitter(
             role_arn=app.config["AWS_REK_SERVICE_ROLE_ARN"],
             sns_topic_arn=app.config["AWS_SNS_TOPIC_ARN"],
@@ -135,6 +147,7 @@ def upload_liquid():
         )
         submitter.do_label_detection()
 
+        # update Liquid with job id
         liquid.job_id = submitter.job_id
         db_session.add(liquid)
         db_session.commit()

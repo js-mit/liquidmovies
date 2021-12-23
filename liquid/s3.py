@@ -13,6 +13,7 @@ s3_client = boto3.client(
     aws_access_key_id=app.config["AWS_ACCESS_KEY_ID"],
     aws_secret_access_key=app.config["AWS_SECRET_ACCESS_KEY"],
 )
+s3_bucket = app.config["AWS_S3_BUCKET"]
 
 
 def get_s3_video_path(user_id, video_id):
@@ -52,10 +53,10 @@ def get_object_url(key):
     Return:
         url in string
     """
-    return f"https://{app.config['AWS_S3_BUCKET']}.s3.amazonaws.com/{key}"
+    return f"https://{s3_bucket}.s3.amazonaws.com/{key}"
 
 
-def upload(file_obj, bucket, key, content_type):
+def upload(file_obj, key, content_type):
     """Upload a file to an S3 bucket
 
     Decides whether to use boto3's `upload_file` or
@@ -63,7 +64,6 @@ def upload(file_obj, bucket, key, content_type):
 
     Args:
         file_name: File to upload
-        bucket: Bucket to upload to
         key: path + filename and extention
         content_type: type of content
 
@@ -78,7 +78,7 @@ def upload(file_obj, bucket, key, content_type):
                 json.dump(file_obj, f, ensure_ascii=False, indent=4)
                 s3_client.upload_file(
                     tmp_file,
-                    bucket,
+                    s3_bucket,
                     key,
                     ExtraArgs={"ContentType": content_type, "ACL": "public-read"},
                 )
@@ -86,7 +86,7 @@ def upload(file_obj, bucket, key, content_type):
         else:
             s3_client.upload_fileobj(
                 file_obj,
-                bucket,
+                s3_bucket,
                 key,
                 ExtraArgs={"ContentType": content_type, "ACL": "public-read"},
             )
@@ -94,3 +94,11 @@ def upload(file_obj, bucket, key, content_type):
         logging.error(e)
         return False
     return True
+
+
+def get_liquid_data(user_id, video_id, liquid_id):
+    """ TODO """
+    key = get_s3_liquid_path(user_id, video_id, liquid_id)
+    with open("tmp.json", 'wb') as f:
+        s3_client.download_fileobj(s3_bucket, key, f)
+        return f
