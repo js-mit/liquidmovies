@@ -2,7 +2,7 @@
 
 {% block js %}
     <script>
-        const liquid = {{ liquid.liquid | safe }};
+        const liquid = {{ data | safe }};
         const treatment = {{ liquid.treatment_id | safe }};
         const liquid_desc = "{{ liquid.video.desc | safe }}";
     </script>
@@ -48,7 +48,7 @@
         treatment: {{ liquid.treatment }}
     </div>
     <div class="vid-instructions">
-        instructions: {{ liquid.liquid }}
+        instructions: {{ data }}
     </div>
 
 {% endblock %}

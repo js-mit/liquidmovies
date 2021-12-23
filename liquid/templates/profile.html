@@ -22,9 +22,10 @@
 
     <h2>Your Liquid Videos</h2>
     {% for liquid in liquids %}
+    {% if liquid.processing == False %}
     <div>
         <a href="{{ url_for('liquid', liquid_id=liquid.id) }}">
-            Liquid: {{ liquid.id }} | Video: {{ liquid.video }} | Treatment: {{ liquid.treatment }} | Desc: {{ liquid.video.desc }} | User: {{ liquid.user_id }}
+            Liquid: {{ liquid.id }} | Video: {{ liquid.video.name }} | Treatment: {{ liquid.treatment }} | Desc: {{ liquid.video.desc }} | User: {{ liquid.user_id }}
         </a>
     </div>
     <div>
@@ -32,6 +33,12 @@
             (del)
         </a>
     </div>
+    {% else %}
+    <div>
+        Processing - Liquid: {{ liquid.id }} | Video: {{ liquid.video.name }} | Treatment: {{ liquid.treatment }} | Desc: {{ liquid.video.desc }} | User: {{ liquid.user_id }}
+    </div>
+
+    {% endif %}
     <hr>
     {% endfor %}
 

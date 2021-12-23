@@ -54,7 +54,7 @@ $(document).ready(function() {
             markers.forEach(i => addMarker(video, i));
 
             // hack
-            if (liquid_desc.includes("search")) {
+            if (treatment == 2) {
                 markers.forEach(i => addIm(i, liquid[i]));
                 $("#search-images .thumbnail").hover(function() {
                     $(this).find(".thumbnail-overlay").show();

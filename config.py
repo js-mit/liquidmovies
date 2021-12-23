@@ -13,6 +13,9 @@ class Config:
     AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
     AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
     AWS_S3_BUCKET = "liquidmovies"
+    AWS_SNS_TOPIC_ARN = os.environ.get("AWS_SNS_TOPIC_ARN")
+    AWS_LAMBDA_FUNCTION_ARN = os.environ.get("AWS_LAMBDA_FUNCTION_ARN")
+    AWS_REK_SERVICE_ROLE_ARN = os.environ.get("AWS_REK_SERVICE_ROLE_ARN")
 
 
 class Prod(Config):
