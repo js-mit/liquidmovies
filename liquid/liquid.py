@@ -54,7 +54,6 @@ def get_liquid_job(job_id):
         # upload results as json file to s3
         success = s3.upload(
             file_obj=detector.labels,
-            bucket=app.config["AWS_S3_BUCKET"],
             key=key,
             content_type="application/json",
         )

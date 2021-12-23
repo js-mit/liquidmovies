@@ -45,7 +45,7 @@ def get_s3_liquid_path(user_id, video_id, liquid_id):
 
 def get_object_url(key):
     """Get s3 object url
-    url structure: <bucket>.s3.amazonaws.com/<key>
+    url structure: <s3_bucket>.s3.amazonaws.com/<key>
 
     Args:
         path: the object path
@@ -73,16 +73,19 @@ def upload(file_obj, key, content_type):
     try:
         if "json" in content_type:
             milliseconds = str(int(round(time.time() * 1000)))
+
             tmp_file = f"data-{milliseconds}.json"
             with open(tmp_file, "w", encoding="utf-8") as f:
                 json.dump(file_obj, f, ensure_ascii=False, indent=4)
-                s3_client.upload_file(
-                    tmp_file,
-                    s3_bucket,
-                    key,
-                    ExtraArgs={"ContentType": content_type, "ACL": "public-read"},
-                )
-                os.remove(tmp_file)
+                f.close()
+
+            s3_client.upload_file(
+                tmp_file,
+                s3_bucket,
+                key,
+                ExtraArgs={"ContentType": content_type, "ACL": "public-read"},
+            )
+            os.remove(tmp_file)
         else:
             s3_client.upload_fileobj(
                 file_obj,
@@ -98,7 +101,13 @@ def upload(file_obj, key, content_type):
 
 def get_liquid_data(user_id, video_id, liquid_id):
     """ TODO """
-    key = get_s3_liquid_path(user_id, video_id, liquid_id)
-    with open("tmp.json", 'wb') as f:
-        s3_client.download_fileobj(s3_bucket, key, f)
-        return f
+    path = get_s3_liquid_path(user_id, video_id, liquid_id)
+    key = f"{path}/data.json"
+
+    milliseconds = str(int(round(time.time() * 1000)))
+    tmp_file = f"data-{milliseconds}.json"
+    s3_client.download_file(s3_bucket, key, tmp_file)
+    with open(tmp_file) as f:
+        data = json.load(f)
+        f.close()
+

@@ -27,9 +27,10 @@ def profile():
         (Liquid.user_id == current_user.id),
     ).all()
 
-    # testing only
-    l = Liquid.query.get(7)
+    # TODO testing only
+    l = Liquid.query.get(11)
     data = s3.get_liquid_data(current_user.id, l.video.id, l.id)
+    print(data)
 
     return render_template("profile.html", liquids=liquids)
 

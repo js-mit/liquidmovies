@@ -58,12 +58,14 @@ class VideoDetector:
 
             response = aws_rek.get_label_detection(
                 JobId=self.job_id,
-                MaxResults=1000,
+                MaxResults=500,
                 NextToken=pagination_token,
                 SortBy="TIMESTAMP",
             )
 
-            self.labels += response["Labels"]
+            assert(isinstance(response["Labels"], list))
+
+            self.labels.extend(response["Labels"])
             self.duration = str(response["VideoMetadata"]["DurationMillis"])
 
             if "NextToken" in response:
