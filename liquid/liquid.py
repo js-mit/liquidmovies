@@ -33,6 +33,7 @@ def delete_liquid(liquid_id):
 @app.route("/liquid/job/<job_id>")
 @login_required
 def get_liquid_job(job_id):
+    """ TODO """
     detector = VideoDetector(job_id)
     if not detector.get_results():
         liquid = Liquid.query.filter(Liquid.job_id == job_id).first()
@@ -60,7 +61,8 @@ def get_liquid_job(job_id):
 @app.route("/liquid/upload", methods=["GET", "POST"])
 @login_required
 def upload_liquid():
-    """Uploads liquid
+    """Uploads video + kicks of video processing
+
     POST:
         1. Upload video to aws s3 and get video s3 url
         2. Create Video entry (and save to db)
