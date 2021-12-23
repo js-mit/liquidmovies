@@ -1,4 +1,4 @@
-""" AWS helper functions """
+""" S3 helper functions """
 from flask import current_app as app
 from botocore.exceptions import ClientError
 import logging
@@ -28,18 +28,18 @@ def get_s3_video_path(user_id, video_id):
     return f"users/{user_id}/videos/{video_id}"
 
 
-def get_s3_treatment_path(user_id, video_id, treatment_id):
-    """ Gets s3 treatment path
-    path structure: users/<user_id>/videos/<video_id>/treatment/<treatment_id>
+def get_s3_liquid_path(user_id, video_id, liquid_id):
+    """ Gets s3 liquid path
+    path structure: users/<user_id>/videos/<video_id>/liquids/<liquid_id>
 
     Args:
         user_id: user_id
         video_id: video_id
-        treatment_id: treatment_id
+        treatment_id: liquid_id
     Returns:
         string url
     """
-    return f"users/{user_id}/videos/{video_id}/treatments/{treatment_id}"
+    return f"users/{user_id}/videos/{video_id}/liquids/{liquid_id}"
 
 
 def get_object_url(key):

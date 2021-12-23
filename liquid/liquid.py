@@ -33,13 +33,18 @@ def delete_liquid(liquid_id):
 @app.route("/liquid/job/<job_id>")
 @login_required
 def get_liquid_job(job_id):
-    """ TODO """
+    """Gets job results from Rekcognition
+
+    1. get results from Rekcognition API
+    2. save json results to S3 location
+    3. upload liquid entry
+    """
     detector = VideoDetector(job_id)
     if not detector.get_results():
         liquid = Liquid.query.filter(Liquid.job_id == job_id).first()
 
-        path = s3.get_s3_treatment_path(
-            current_user.id, liquid.video.id, liquid.treatment_id
+        path = s3.get_s3_liquid_path(
+            current_user.id, liquid.video.id, liquid.id
         )
         key = f"{path}/data.json"
         if s3.upload(
