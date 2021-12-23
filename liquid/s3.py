@@ -1,6 +1,7 @@
 """ S3 helper functions """
 from flask import current_app as app
 from botocore.exceptions import ClientError
+from urllib.parse import urlparse
 import logging
 import boto3
 import json
@@ -17,7 +18,7 @@ s3_bucket = app.config["AWS_S3_BUCKET"]
 
 
 def get_s3_video_path(user_id, video_id):
-    """ Gets s3 video path
+    """Gets s3 video path
     path structure: users/<user_id>/videos/<video_id>
 
     Args:
@@ -30,7 +31,7 @@ def get_s3_video_path(user_id, video_id):
 
 
 def get_s3_liquid_path(user_id, video_id, liquid_id):
-    """ Gets s3 liquid path
+    """Gets s3 liquid path
     path structure: users/<user_id>/videos/<video_id>/liquids/<liquid_id>
 
     Args:
@@ -99,8 +100,8 @@ def upload(file_obj, key, content_type):
     return True
 
 
-def download_liquid(key):
-    """ Get liquid data stored in s3 bucket
+def _download_liquid(key):
+    """Get liquid data stored in s3 bucket
 
     Args:
         key: key of s3 object (use `get_s3_liquid_path` func)
@@ -116,3 +117,12 @@ def download_liquid(key):
         f.close()
     os.remove(tmp_file)
     return data
+
+
+def download_liquid_by_key(key):
+    return _download_liquid(key)
+
+
+def download_liquid_by_url(url):
+    key = urlparse(url).path[1:]
+    return _download_liquid(key)

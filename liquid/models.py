@@ -70,7 +70,6 @@ class Liquid(Base):
     time_created = Column(DateTime(timezone=True), server_default=func.now())
     video_id = Column(Integer, ForeignKey("video.id"))
     user_id = Column(Integer, ForeignKey("user.id"))
-    instructions = Column(JSON, nullable=True)
     url = Column(String, nullable=True)
     treatment_id = Column(Integer, ForeignKey("treatment.id"))
     active = Column(Boolean, unique=False, default=True)
