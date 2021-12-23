@@ -15,6 +15,7 @@ def liquid(liquid_id):
     """TODO"""
     liquid = Liquid.query.filter(Liquid.id == liquid_id, Liquid.active == True).first()
     data = s3.download_liquid_by_url(liquid.url)
+
     if liquid is None:
         abort(404)
 

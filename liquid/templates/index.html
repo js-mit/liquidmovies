@@ -6,12 +6,14 @@
 <h2>Videos</h2>
 
 {% for liquid in liquids %}
+{% if liquid.processing == False %}
 <div>
     <a href="{{ url_for('liquid', liquid_id=liquid.id) }}">
         Liquid: {{ liquid.id }} | Video: {{ liquid.video }} | Treatment: {{ liquid.treatment }} | Desc: {{ liquid.video.desc }} | User: {{ liquid.user_id }}
     </a>
 </div>
 <hr>
+{% endif %}
 {% endfor %}
 
 {% endblock %}
