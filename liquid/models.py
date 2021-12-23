@@ -53,6 +53,7 @@ class Video(Base):
     time_created = Column(DateTime(timezone=True), server_default=func.now())
     url = Column(String, nullable=True)
     poster_url = Column(String, nullable=True)
+    duration = Column(Integer, nullable=True)  # milliseconds
     active = Column(Boolean, unique=False, default=True)
     private = Column(Boolean, default=False)
 
@@ -69,10 +70,13 @@ class Liquid(Base):
     time_created = Column(DateTime(timezone=True), server_default=func.now())
     video_id = Column(Integer, ForeignKey("video.id"))
     user_id = Column(Integer, ForeignKey("user.id"))
-    liquid = Column(JSON, nullable=False)
+    instructions = Column(JSON, nullable=True)
+    url = Column(String, nullable=True)
     treatment_id = Column(Integer, ForeignKey("treatment.id"))
     active = Column(Boolean, unique=False, default=True)
     private = Column(Boolean, default=False)
+    job_id = Column(String, nullable=True)
+    processing = Column(Boolean, default=False)
     treatment = relationship("Treatment", backref="liquids")
     video = relationship("Video", backref="liquids")
 

@@ -68,7 +68,7 @@ instructions[15:22] = [1] * 6
 instructions[36:46] = [1] * 9
 l1 = Liquid(
     video_id=1,
-    liquid=instructions,
+    instructions=instructions,
     treatment_id=1,
 )
 
@@ -98,7 +98,7 @@ instructions[2910] = ["government", "america"]
 instructions[2978] = ["america", "politics"]
 instructions[3118] = ["cold war", "floor", "america"]
 instructions[3200] = ["cold war", "floor", "america", "ussr"]
-l2 = Liquid(video_id=2, liquid=instructions, treatment_id=1)
+l2 = Liquid(video_id=2, instructions=instructions, treatment_id=1)
 
 instructions = [[""]] * 3054
 instructions[958] = [
@@ -191,7 +191,7 @@ instructions[2034] = [
 instructions[2039] = [
     "https://liquidmovies.s3.amazonaws.com/ctrlf_imgs+(our_planet)/butterfly_13.png"
 ]
-l3 = Liquid(video_id=3, liquid=instructions, treatment_id=2)
+l3 = Liquid(video_id=3, instructions=instructions, treatment_id=2)
 db_session.add_all([l1, l2, l3])
 
 
