@@ -99,15 +99,20 @@ def upload(file_obj, key, content_type):
     return True
 
 
-def get_liquid_data(user_id, video_id, liquid_id):
-    """ TODO """
-    path = get_s3_liquid_path(user_id, video_id, liquid_id)
-    key = f"{path}/data.json"
+def download_liquid(key):
+    """ Get liquid data stored in s3 bucket
 
+    Args:
+        key: key of s3 object (use `get_s3_liquid_path` func)
+    Returns:
+        liquid data as python object
+    """
+    data = None
     milliseconds = str(int(round(time.time() * 1000)))
     tmp_file = f"data-{milliseconds}.json"
     s3_client.download_file(s3_bucket, key, tmp_file)
     with open(tmp_file) as f:
         data = json.load(f)
         f.close()
-
+    os.remove(tmp_file)
+    return data

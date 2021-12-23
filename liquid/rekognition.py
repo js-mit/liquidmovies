@@ -63,8 +63,6 @@ class VideoDetector:
                 SortBy="TIMESTAMP",
             )
 
-            assert(isinstance(response["Labels"], list))
-
             self.labels.extend(response["Labels"])
             self.duration = str(response["VideoMetadata"]["DurationMillis"])
 
