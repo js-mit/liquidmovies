@@ -58,6 +58,7 @@ To run celery, enter the liquid-app container and run
 ```
 celery -A celery_worker.celery worker --pool=solo --loglevel=info
 ```
+> It is suggested that the celery worker is kicked off before the `flask run` command is called
 
 ## Dev standard
 
@@ -82,6 +83,8 @@ sqlite3 instance/liquid.db
 ```
 
 # Deployment
+
+> TODO, use Docker-compose to manage redis, celery and flask
 
 Deploy to lightsail.
 

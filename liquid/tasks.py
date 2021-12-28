@@ -10,23 +10,15 @@ from .models import Liquid
 from .db import db_session
 
 
-@celery.task(name='app.tasks.send_celery_email')
-def send_celery_email(message_data):
-    print(message_data["subject"])
+@celery.task(name='app.tasks.celery_test')
+def celery_test(message):
+    # randomly update something in the db show that connections works
     liquid = Liquid.query.filter(Liquid.id == 3).first()
     liquid.active = True
     db_session.add(liquid)
     db_session.commit()
-    print("HERE")
     print(liquid.treatment_id)
     return "done"
-    # message = Message(
-    #     subject=message_data['subject'],
-    #     recipients=[message_data['recipients']],
-    #     body=message_data['body'],
-    #     sender=app.config['MAIL_DEFAULT_SENDER']
-    # )
-    # mail.send(message)
 
 
 @celery.task(name='app.tasks.process_job_data')

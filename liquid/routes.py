@@ -5,7 +5,7 @@ from flask_login import current_user, login_required
 from . import s3
 from .db import db_session
 from .models import Liquid, Video
-from .tasks import send_celery_email
+from .tasks import celery_test
 
 
 @app.route("/")
@@ -39,14 +39,10 @@ def raw_video(video_id):
     return render_template("raw_video.html", video=video)
 
 
+# testing celery!
 @app.route("/celery")
 def celery():
-    message_data={
-        'subject': 'Hello from the flask app!',
-        'body': 'This email was sent asynchronously using Celery.',
-        'recipients': 'hi@gmail.com',
-    }
-    send_celery_email.apply_async(args=[message_data])
+    celery_test.apply_async(args=["hi"])
     return "success"
 
 
