@@ -94,8 +94,7 @@ def logout():
 def user_loader(user_id):
     """Given *user_id*, return the associated User object.
 
-    Arugs:
-    :param unicode user_id: user_id (email) user to retrieve
-
+    Args:
+        user_id: user_id user to retrieve
     """
     return User.query.get(user_id)

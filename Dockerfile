@@ -8,6 +8,7 @@ WORKDIR /home
 
 RUN apt-get -y update \
     && apt-get -y upgrade \
+    && apt-get -y install ffmpeg libsm6 libxext6 \
     && pip install -r requirements.txt
 
 # FLASK_ENV should be overidden during prod deployment

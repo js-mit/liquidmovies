@@ -1,10 +1,11 @@
-from flask import render_template, abort
+from flask import render_template, abort, redirect, url_for
 from flask import current_app as app
 from flask_login import current_user, login_required
 
 from . import s3
 from .db import db_session
 from .models import Liquid, Video
+from .tasks import send_celery_email
 
 
 @app.route("/")
@@ -36,6 +37,17 @@ def raw_video(video_id):
     if video is None:
         abort(404)
     return render_template("raw_video.html", video=video)
+
+
+@app.route("/celery")
+def celery():
+    message_data={
+        'subject': 'Hello from the flask app!',
+        'body': 'This email was sent asynchronously using Celery.',
+        'recipients': 'hi@gmail.com',
+    }
+    send_celery_email.apply_async(args=[message_data])
+    return "success"
 
 
 @app.teardown_appcontext

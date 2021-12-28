@@ -14,6 +14,7 @@ $(document).ready(function() {
             video.currentTime = second;
         });
     }
+
     function clearMarkers() {
         $(".marker").remove();
     }
@@ -47,21 +48,25 @@ $(document).ready(function() {
         if (string) {
             for (var i=0; i<liquid.length; i++) {
                 var el = liquid[i];
-                if (el.join(' ').includes(string)) {
-                    markers.push(i);
+                var label = el["Label"]["Name"].toLowerCase();
+                var confidence = parseFloat(el["Label"]["Confidence"])
+                if (confidence >= 97.5) {
+                    if (label.includes(string.toLowerCase())) {
+                        markers.push(parseInt(el["Timestamp"])/1000);
+                    }
                 }
             }
             markers.forEach(i => addMarker(video, i));
 
-            // hack
-            if (treatment == 2) {
-                markers.forEach(i => addIm(i, liquid[i]));
-                $("#search-images .thumbnail").hover(function() {
-                    $(this).find(".thumbnail-overlay").show();
-                }, function() {
-                    $(this).find(".thumbnail-overlay").hide();
-                });
-            }
+            // // hack
+            // if (treatment == 2) {
+            //     markers.forEach(i => addIm(i, liquid[i]));
+            //     $("#search-images .thumbnail").hover(function() {
+            //         $(this).find(".thumbnail-overlay").show();
+            //     }, function() {
+            //         $(this).find(".thumbnail-overlay").hide();
+            //     });
+            // }
         }
     });
 });
