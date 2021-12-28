@@ -2,7 +2,6 @@ from pathlib import Path
 from flask import render_template, redirect, url_for, abort, flash
 from flask import current_app as app
 from flask_login import current_user, login_required
-import json
 
 from . import s3
 from .db import db_session
@@ -15,7 +14,7 @@ from .tasks import process_job_data
 
 @app.route("/liquid/<int:liquid_id>")
 def liquid(liquid_id):
-    """ Get Liquid Video based on liquid id
+    """Get Liquid Video based on liquid id
 
     1. Download liquid data from s3 bucket
     2. Process data based on treatment type
@@ -48,31 +47,13 @@ def get_liquid_job(job_id):
     """Gets job results from Rekcognition
 
     1. get results from Rekcognition API
-    2. save json results to S3 location
-    3. upload liquid entry
+    2. and send to celery job
     """
-    detector = VideoDetector(job_id)
-
     # get results from rekognition
+    detector = VideoDetector(job_id)
     if not detector.get_results():
-
-        # kickoff celery job
         process_job_data.apply_async(args=[detector.labels, job_id])
         flash(f"Job <{job_id}> results are being processed in the background...")
-
-        # # get Liquid entry
-        # path = s3.get_s3_liquid_path(current_user.id, liquid.video.id, liquid.id)
-        # key = f"{path}/data.json"
-
-        # # preprocess data depending on treatment_id
-        # preprocess_data(detector.labels, liquid, liquid.treatment_id)
-
-        # # update liquid entry
-        # liquid.processing = False
-        # liquid.url = s3.get_object_url(key)
-        # liquid.duration = detector.duration
-        # db_session.add(liquid)
-        # db_session.commit()
 
     return redirect(url_for("profile"))
 

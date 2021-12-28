@@ -1,5 +1,3 @@
-# from flask_mail import Message
-from flask import current_app as app
 import cv2
 import json
 import io
@@ -10,7 +8,7 @@ from .models import Liquid
 from .db import db_session
 
 
-@celery.task(name='app.tasks.celery_test')
+@celery.task(name="app.tasks.celery_test")
 def celery_test(message):
     # randomly update something in the db show that connections works
     liquid = Liquid.query.filter(Liquid.id == 3).first()
@@ -21,9 +19,9 @@ def celery_test(message):
     return "done"
 
 
-@celery.task(name='app.tasks.process_job_data')
+@celery.task(name="app.tasks.process_job_data")
 def process_job_data(data, job_id):
-    """ Preprocess data based on treatment id
+    """Preprocess data based on treatment id
 
     Args:
         data: data from model output
@@ -48,6 +46,8 @@ def _process_speech_search(data, liquid):
 
 def _process_image_search(data, liquid):
     """Process label detector results from rekognition
+
+    #TODO convert print lines to log statements
 
     1. load video from url in opencv VideoCapture
     2. for each label found in data, get frame based on timestamp
@@ -87,9 +87,7 @@ def _process_image_search(data, liquid):
             # save frame to s3 bucket
             start = time.time()
             success = s3.upload_fileobj(
-                obj=numpy_to_binary(frame),
-                key=frame_key,
-                content_type="image/jpeg"
+                obj=numpy_to_binary(frame), key=frame_key, content_type="image/jpeg"
             )
             if not success:
                 print(f"Error uploading {timestamp}")
@@ -109,7 +107,7 @@ def _process_image_search(data, liquid):
         content_type="application/json",
     )
     if not success:
-        print(f"Error uploading json file.")
+        print("Error uploading json file.")
         return False
 
     print(f"Total of {get_frame_time} seconds to get frames from opencv")

@@ -1,14 +1,8 @@
 """ Consider renaming this file or reorganizing the functions within it """
-import cv2
-import json
-import io
-import time
-
-from . import s3
 
 
 def render_data(data, treatment_id):
-    """ Render data for the frontend based on treatment id
+    """Render data for the frontend based on treatment id
 
     Args:
         data: data from s3 bucket

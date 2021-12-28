@@ -1,7 +1,6 @@
 import os
 from flask import Flask
 from flask_login import LoginManager
-# from flask_mail import Mail
 from celery import Celery
 from config import Config
 
@@ -10,30 +9,8 @@ login_manager = LoginManager()
 
 # instantiate celery
 celery = Celery(
-    __name__,
-    broker=Config.CELERY_BROKER_URL,
-    result_backend=Config.RESULT_BACKEND
+    __name__, broker=Config.CELERY_BROKER_URL, result_backend=Config.RESULT_BACKEND
 )
-
-# # instantiate flask mail
-# mail = Mail()
-
-
-# def make_celery(app):
-#     celery = Celery(
-#         app.import_name,
-#         backend=app.config['RESULT_BACKEND'],
-#         broker=app.config['CELERY_BROKER_URL']
-#     )
-#     celery.conf.update(app.config)
-# 
-#     class ContextTask(celery.Task):
-#         def __call__(self, *args, **kwargs):
-#             with app.app_context():
-#                 return self.run(*args, **kwargs)
-# 
-#     celery.Task = ContextTask
-#     return celery
 
 
 def create_app(test_config=None):
@@ -72,6 +49,5 @@ def create_app(test_config=None):
         from . import auth
         from . import s3
         from . import liquid
-        # from . import tasks
 
         return app

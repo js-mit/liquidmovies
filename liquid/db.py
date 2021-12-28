@@ -26,7 +26,7 @@ engine = create_engine(
         "keepalives_idle": 30,
         "keepalives_interval": 10,
         "keepalives_count": 5,
-    }
+    },
 )
 db_session = scoped_session(
     sessionmaker(autocommit=False, autoflush=False, bind=engine)

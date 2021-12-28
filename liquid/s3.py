@@ -58,7 +58,7 @@ def get_object_url(key):
 
 
 def put_object(obj, key, content_type):
-    """ Upload object using s3 boto put_object function
+    """Upload object using s3 boto put_object function
 
     Args:
         fname: filename
@@ -73,7 +73,7 @@ def put_object(obj, key, content_type):
             Bucket=s3_bucket,
             Body=obj,
             ContentType=content_type,
-            Key=key
+            Key=key,
         )
     except ClientError as e:
         logging.error(e)
@@ -82,7 +82,7 @@ def put_object(obj, key, content_type):
 
 
 def upload_fileobj(obj, key, content_type):
-    """ Upload object using s3 boto3 upload_fileobj function
+    """Upload object using s3 boto3 upload_fileobj function
     Use this is file is big and may require multithreading or a stream
 
     Args:

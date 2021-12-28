@@ -1,8 +1,7 @@
-from flask import render_template, abort, redirect, url_for
+from flask import render_template, abort
 from flask import current_app as app
 from flask_login import current_user, login_required
 
-from . import s3
 from .db import db_session
 from .models import Liquid, Video
 from .tasks import celery_test
