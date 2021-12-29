@@ -17,7 +17,17 @@ db_path = (
     else "sqlite:///" + str(Path(__file__).parent.parent / "instance/liquid.db")
 )
 
-engine = create_engine(f"{db_path}", convert_unicode=True)
+engine = create_engine(
+    db_path,
+    convert_unicode=True,
+    pool_pre_ping=True,
+    connect_args={
+        "keepalives": 1,
+        "keepalives_idle": 30,
+        "keepalives_interval": 10,
+        "keepalives_count": 5,
+    },
+)
 db_session = scoped_session(
     sessionmaker(autocommit=False, autoflush=False, bind=engine)
 )

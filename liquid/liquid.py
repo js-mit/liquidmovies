@@ -8,16 +8,25 @@ from .db import db_session
 from .models import Liquid, Video, Treatment
 from .forms import UploadVideoForm
 from .rekognition import VideoDetector, VideoSubmitter
+from .treatment import render_data
+from .tasks import process_job_data
 
 
 @app.route("/liquid/<int:liquid_id>")
 def liquid(liquid_id):
-    """TODO"""
+    """Get Liquid Video based on liquid id
+
+    1. Download liquid data from s3 bucket
+    2. Process data based on treatment type
+    3. Render page with data
+    """
     liquid = Liquid.query.filter(Liquid.id == liquid_id, Liquid.active == True).first()
-    data = s3.download_liquid_by_url(liquid.url)
 
     if liquid is None:
         abort(404)
+
+    data = s3.download_liquid_by_url(liquid.url)
+    data = render_data(data, liquid.treatment_id)
 
     return render_template("liquid.html", liquid=liquid, data=data)
 
@@ -38,34 +47,13 @@ def get_liquid_job(job_id):
     """Gets job results from Rekcognition
 
     1. get results from Rekcognition API
-    2. save json results to S3 location
-    3. upload liquid entry
+    2. and send to celery job
     """
-    detector = VideoDetector(job_id)
-
     # get results from rekognition
+    detector = VideoDetector(job_id)
     if not detector.get_results():
-
-        # get Liquid entry
-        liquid = Liquid.query.filter(Liquid.job_id == job_id).first()
-        path = s3.get_s3_liquid_path(current_user.id, liquid.video.id, liquid.id)
-        key = f"{path}/data.json"
-
-        # upload results as json file to s3
-        success = s3.upload(
-            file_obj=detector.labels,
-            key=key,
-            content_type="application/json",
-        )
-        if not success:
-            print("ERROR")
-
-        # update liquid entry
-        liquid.processing = False
-        liquid.url = s3.get_object_url(key)
-        liquid.duration = detector.duration
-        db_session.add(liquid)
-        db_session.commit()
+        process_job_data.apply_async(args=[detector.labels, job_id])
+        flash(f"Job <{job_id}> results are being processed in the background...")
 
     return redirect(url_for("profile"))
 
@@ -98,8 +86,8 @@ def upload_liquid():
         s3_path = s3.get_s3_video_path(current_user.id, video.id)
 
         # upload video
-        success = s3.upload(
-            file_obj=form.video.data,
+        success = s3.upload_fileobj(
+            obj=form.video.data,
             key=f"{s3_path}/video.mp4",
             content_type="video/mp4",
         )
@@ -109,8 +97,8 @@ def upload_liquid():
         # upload poster, modify depending on suffix
         ext = Path(form.poster.data.filename).suffix
         ext = "png" if "png" in ext else "jpeg"
-        success = s3.upload(
-            file_obj=form.poster.data,
+        success = s3.upload_fileobj(
+            obj=form.poster.data,
             key=f"{s3_path}/poster.{ext}",
             content_type="image/{ext}",
         )

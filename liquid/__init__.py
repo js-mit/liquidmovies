@@ -1,9 +1,16 @@
 import os
 from flask import Flask
 from flask_login import LoginManager
+from celery import Celery
+from config import Config
 
 
 login_manager = LoginManager()
+
+# instantiate celery
+celery = Celery(
+    __name__, broker=Config.CELERY_BROKER_URL, result_backend=Config.RESULT_BACKEND
+)
 
 
 def create_app(test_config=None):
@@ -30,6 +37,9 @@ def create_app(test_config=None):
 
     # init plugins
     login_manager.init_app(app)
+
+    # set up celery
+    celery.conf.update(app.config)
 
     with app.app_context():
         # Import parts of our application

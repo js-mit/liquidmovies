@@ -56,8 +56,16 @@ db_session.add_all([t1, t2])
 """
 Create Liquids
 """
-l1 = Liquid(video_id=1, url="https://liquidmovies.s3.amazonaws.com/dev/videos/lecture/liquids/1/data.json", treatment_id=1)
-l2 = Liquid(video_id=2, url="https://liquidmovies.s3.amazonaws.com/dev/videos/our-planet/liquids/2/data.json", treatment_id=2)
+l1 = Liquid(
+    video_id=1,
+    url="https://liquidmovies.s3.amazonaws.com/dev/videos/lecture/liquids/1/data.json",
+    treatment_id=1,
+)
+l2 = Liquid(
+    video_id=2,
+    url="https://liquidmovies.s3.amazonaws.com/dev/videos/our-planet/liquids/2/data.json",
+    treatment_id=2,
+)
 db_session.add_all([l1, l2])
 
 

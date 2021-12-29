@@ -2,9 +2,9 @@ from flask import render_template, abort
 from flask import current_app as app
 from flask_login import current_user, login_required
 
-from . import s3
 from .db import db_session
 from .models import Liquid, Video
+from .tasks import celery_test
 
 
 @app.route("/")
@@ -36,6 +36,13 @@ def raw_video(video_id):
     if video is None:
         abort(404)
     return render_template("raw_video.html", video=video)
+
+
+# testing celery!
+@app.route("/celery")
+def celery():
+    celery_test.apply_async(args=["hi"])
+    return "success"
 
 
 @app.teardown_appcontext

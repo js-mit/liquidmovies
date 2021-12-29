@@ -14,6 +14,7 @@ $(document).ready(function() {
             video.currentTime = second;
         });
     }
+
     function clearMarkers() {
         $(".marker").remove();
     }
@@ -44,18 +45,24 @@ $(document).ready(function() {
         clearIms();
         var string = $(this).val();
         var markers = [];
+        var frameUrls = [];
         if (string) {
             for (var i=0; i<liquid.length; i++) {
                 var el = liquid[i];
-                if (el.join(' ').includes(string)) {
-                    markers.push(i);
+                var label = el["Label"]["Name"].toLowerCase();
+                var confidence = parseFloat(el["Label"]["Confidence"])
+                if (confidence >= 97.5) {
+                    if (label.includes(string.toLowerCase())) {
+                        markers.push(parseInt(el["Timestamp"])/1000);
+                        frameUrls.push(el["FrameURL"])
+                    }
                 }
             }
             markers.forEach(i => addMarker(video, i));
 
             // hack
             if (treatment == 2) {
-                markers.forEach(i => addIm(i, liquid[i]));
+                frameUrls.forEach((e, i) => addIm(markers[i], e));
                 $("#search-images .thumbnail").hover(function() {
                     $(this).find(".thumbnail-overlay").show();
                 }, function() {

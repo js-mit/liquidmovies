@@ -57,43 +57,48 @@ def get_object_url(key):
     return f"https://{s3_bucket}.s3.amazonaws.com/{key}"
 
 
-def upload(file_obj, key, content_type):
-    """Upload a file to an S3 bucket
-
-    Decides whether to use boto3's `upload_file` or
-    `upload_fileobj` depending on content type
+def put_object(obj, key, content_type):
+    """Upload object using s3 boto put_object function
 
     Args:
-        file_name: File to upload
-        key: path + filename and extention
-        content_type: type of content
-
-    Return:
-        True if file was uploaded, else False
+        fname: filename
+        key: path + filename and extention to save in s3
+        content_type: "application/json" if json, etc
+    Return
+        success
     """
     try:
-        if "json" in content_type:
-            milliseconds = str(int(round(time.time() * 1000)))
+        s3_client.put_object(
+            ACL="public-read",
+            Bucket=s3_bucket,
+            Body=obj,
+            ContentType=content_type,
+            Key=key,
+        )
+    except ClientError as e:
+        logging.error(e)
+        return False
+    return True
 
-            tmp_file = f"data-{milliseconds}.json"
-            with open(tmp_file, "w", encoding="utf-8") as f:
-                json.dump(file_obj, f, ensure_ascii=False, indent=4)
-                f.close()
 
-            s3_client.upload_file(
-                tmp_file,
-                s3_bucket,
-                key,
-                ExtraArgs={"ContentType": content_type, "ACL": "public-read"},
-            )
-            os.remove(tmp_file)
-        else:
-            s3_client.upload_fileobj(
-                file_obj,
-                s3_bucket,
-                key,
-                ExtraArgs={"ContentType": content_type, "ACL": "public-read"},
-            )
+def upload_fileobj(obj, key, content_type):
+    """Upload object using s3 boto3 upload_fileobj function
+    Use this is file is big and may require multithreading or a stream
+
+    Args:
+        fname: filename
+        key: path + filename and extention to save in s3
+        content_type: "video/mp4" if video, etc
+    Return
+        success
+    """
+    try:
+        s3_client.upload_fileobj(
+            obj,
+            s3_bucket,
+            key,
+            ExtraArgs={"ContentType": content_type, "ACL": "public-read"},
+        )
     except ClientError as e:
         logging.error(e)
         return False
