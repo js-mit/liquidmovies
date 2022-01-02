@@ -16,8 +16,8 @@ class Config:
     AWS_SNS_TOPIC_ARN = os.environ.get("AWS_SNS_TOPIC_ARN")
     AWS_LAMBDA_FUNCTION_ARN = os.environ.get("AWS_LAMBDA_FUNCTION_ARN")
     AWS_REK_SERVICE_ROLE_ARN = os.environ.get("AWS_REK_SERVICE_ROLE_ARN")
-    CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL")
-    RESULT_BACKEND = os.environ.get("RESULT_BACKEND")
+    CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
+    RESULT_BACKEND = os.environ.get("RESULT_BACKEND", "redis://localhost:6379/0")
 
 
 class Prod(Config):
