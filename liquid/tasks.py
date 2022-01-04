@@ -1,20 +1,18 @@
 import cv2
 import json
-import io
 import time
 
 from . import s3, celery
 from .models import Liquid
 from .db import db_session
 from .rekognition import get_sqs_message, VideoDetector
+from .util import numpy_to_binary
 
 
 @celery.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):
     """ This function sets up Celery Beat """
-    sender.add_periodic_task(
-        60.0, check_sqs.s(), name="check SQS queue every minute"
-    )
+    sender.add_periodic_task(60.0, check_sqs.s(), name="check SQS queue every minute")
 
 
 @celery.task(name="app.tasks.check_sqs")
@@ -95,6 +93,7 @@ def _process_image_search(data, liquid):
     path = s3.get_s3_liquid_path(liquid.user_id, liquid.video.id, liquid.id)
     frames_path = f"{path}/frames"
 
+    # for logging purposes
     get_frame_time = 0
     upload_frame_time = 0
 
@@ -150,10 +149,3 @@ def _process_image_search(data, liquid):
     db_session.commit()
 
     return True
-
-
-def numpy_to_binary(arr):
-    """ Convert video from numpy array to a binary object in memory """
-    _, buffer = cv2.imencode(".jpg", arr)
-    io_buf = io.BytesIO(buffer)
-    return io_buf
