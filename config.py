@@ -12,7 +12,7 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
     AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
     AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
-    AWS_S3_BUCKET = "liquidmovies"
+    AWS_S3_BUCKET = os.environ.get("AWS_S3_BUCKET")
     AWS_SNS_TOPIC_ARN = os.environ.get("AWS_SNS_TOPIC_ARN")
     AWS_SQS_QUEUE_URL = os.environ.get("AWS_SQS_QUEUE_URL")
     AWS_SQS_QUEUE_ARN = os.environ.get("AWS_SQS_QUEUE_ARN")

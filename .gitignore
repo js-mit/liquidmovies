@@ -17,4 +17,7 @@ dist/
 build/
 *.egg-info/
 
+# celery scheduler logs
+celerybeat-schedule
+
 .env
