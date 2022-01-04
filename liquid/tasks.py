@@ -1,6 +1,5 @@
 import cv2
 import json
-import io
 import time
 
 from . import s3, celery
