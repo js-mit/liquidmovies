@@ -15,7 +15,7 @@ Before committing code:
 
 Deploy to lightsail.
 
-## Build container
+### Build container
 Run the following command at root dir (`sudo` may be needed)
 ```
 docker build -t liquid .
