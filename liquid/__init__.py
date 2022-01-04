@@ -48,6 +48,7 @@ def create_app(test_config=None):
         from . import jinja_filters
         from . import auth
         from . import s3
+        from . import rekognition
         from . import liquid
 
         return app

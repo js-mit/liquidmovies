@@ -1,8 +1,32 @@
 import boto3
+import json
+from flask import current_app as app
 
 
+aws_sqs_queue_url = app.config["AWS_SQS_QUEUE_URL"]
 aws_rek = boto3.client("rekognition", region_name="us-east-1")
 aws_sns = boto3.client("sns", region_name="us-east-1")
+aws_sqs = boto3.client("sqs", region_name="us-east-1")
+
+
+def get_sqs_message(cb):
+    """ poll for msg """
+    sqs_response = aws_sqs.receive_message(
+        QueueUrl=aws_sqs_queue_url, MessageAttributeNames=["ALL"], MaxNumberOfMessages=1
+    )
+    if "Messages" in sqs_response:
+        for message in sqs_response["Messages"]:
+            # get rek_msg to get job_id
+            notification = json.loads(message["Body"])
+            rek_msg = json.loads(notification["Message"])
+
+            # get results from rek using this cb
+            cb(rek_msg["JobId"])
+
+            # delete msg from queue
+            aws_sqs.delete_message(
+                QueueUrl=aws_sqs_queue_url, ReceiptHandle=message["ReceiptHandle"]
+            )
 
 
 class VideoSubmitter:
@@ -11,22 +35,22 @@ class VideoSubmitter:
     job_id = ""
     role_arn = ""
     sns_topic_arn = ""
-    lambda_arn = ""
+    sqs_queue_arn = ""
     treatment_id = ""
 
     def __init__(
-        self, role_arn, sns_topic_arn, lambda_arn, bucket, video, treatment_id
+        self, role_arn, sns_topic_arn, sqs_queue_arn, bucket, video, treatment_id
     ):
         self.role_arn = role_arn
         self.sns_topic_arn = sns_topic_arn
-        self.lambda_arn = lambda_arn
+        self.sqs_queue_arn = sqs_queue_arn
         self.bucket = bucket
         self.video = video
         self.treatment_id = treatment_id
 
-        # subscribe the lambda func to the sns topic
+        # subscribe the sqs to the sns topic (if not already)
         aws_sns.subscribe(
-            TopicArn=self.sns_topic_arn, Protocol="lambda", Endpoint=self.lambda_arn
+            TopicArn=self.sns_topic_arn, Protocol="sqs", Endpoint=self.sqs_queue_arn
         )
 
     def do_label_detection(self):

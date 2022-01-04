@@ -126,7 +126,7 @@ def upload_liquid():
         submitter = VideoSubmitter(
             role_arn=app.config["AWS_REK_SERVICE_ROLE_ARN"],
             sns_topic_arn=app.config["AWS_SNS_TOPIC_ARN"],
-            lambda_arn=app.config["AWS_LAMBDA_FUNCTION_ARN"],
+            sqs_queue_arn=app.config["AWS_SQS_QUEUE_ARN"],
             bucket=app.config["AWS_S3_BUCKET"],
             video=f"{s3_path}/video.mp4",
             treatment_id=form.treatment_id.data,
