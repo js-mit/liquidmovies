@@ -10,6 +10,7 @@ from .forms import UploadVideoForm
 from .rekognition import VideoDetector, VideoSubmitter
 from .treatment import render_data
 from .tasks import process_job_data
+from .util import get_duration_and_frame_count
 
 
 @app.route("/liquid/<int:liquid_id>")
@@ -105,9 +106,14 @@ def upload_liquid():
         if not success:
             flash("Upload poster failed.")
 
-        # update video entry with url/poster_url
-        video.url = s3.get_object_url(f"{s3_path}/video.mp4")
+        # update video entry with url/poster_url/duration/frame_count
+        video_url = s3.get_object_url(f"{s3_path}/video.mp4")
+        duration, frame_count = get_duration_and_frame_count(video_url)
+
+        video.url = video_url
         video.poster_url = s3.get_object_url(f"{s3_path}/poster.{ext}")
+        video.duration = duration
+        video.frame_count = frame_count
         db_session.add(video)
 
         # create liquid entry

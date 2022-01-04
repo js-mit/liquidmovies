@@ -53,6 +53,7 @@ class Video(Base):
     url = Column(String, nullable=True)
     poster_url = Column(String, nullable=True)
     duration = Column(Integer, nullable=True)  # milliseconds
+    frame_count = Column(Integer, nullable=True)
     active = Column(Boolean, unique=False, default=True)
     private = Column(Boolean, default=False)
 

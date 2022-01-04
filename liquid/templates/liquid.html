@@ -2,9 +2,9 @@
 
 {% block js %}
     <script>
-        const liquid = {{ data | safe }};
-        const treatment = {{ liquid.treatment_id | safe }};
-        const liquid_desc = "{{ liquid.video.desc | safe }}";
+        const _data = {{ data | safe }};
+        const _duration = {{ liquid.video.duration | safe }};
+        const _treatment = {{ liquid.treatment_id | safe }};
     </script>
     <script src="{{ url_for('static', filename='js/util.js') }}"></script>
     <script src="{{ url_for('static', filename='js/player.js') }}"></script>
@@ -46,9 +46,6 @@
     </div>
     <div class="vid-method">
         treatment: {{ liquid.treatment }}
-    </div>
-    <div class="vid-instructions">
-        instructions: {{ data }}
     </div>
 
 {% endblock %}

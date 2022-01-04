@@ -92,7 +92,7 @@ $(document).ready(function() {
     });
 
     // timestamp
-    duration.html(renderTime(video.prop("duration"), video.prop("duration")));
+    duration.html(renderTime(_duration/1000, _duration/1000)); //video.prop("duration"), video.prop("duration")));
 
     video.on("timeupdate", function() {
         $(currentTime).html(renderTime(video.prop("currentTime"), video.prop("duration")));

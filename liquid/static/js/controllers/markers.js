@@ -20,17 +20,19 @@ $(document).ready(function() {
     }
 
     // add ims
-    function addIm(second, im_url) {
+    function addIm(index, second, im_url, duration) {
+        second = parseInt(second);
         var im = $(`
 <div class="thumbnail">
-    <div class="thumbnail-overlay" id="thumbnail-${second}">
-        <div class="thumbnail-seconds">${renderTime(second, 3054)}</div>
+    <div class="thumbnail-overlay" id="thumbnail-${index}-${second}">
+        <div class="thumbnail-seconds">${renderTime(second, duration)}</div>
     </div>
     <img src='${im_url}'/>
 </div>
 `);
         $("#search-images").append(im);
-        $("#thumbnail-" + second).click(function() {
+        $("#thumbnail-"+index+"-"+second).click(function() {
+            console.log("Click happened.")
             video.currentTime = second;
         });
     }
@@ -47,8 +49,8 @@ $(document).ready(function() {
         var markers = [];
         var frameUrls = [];
         if (string) {
-            for (var i=0; i<liquid.length; i++) {
-                var el = liquid[i];
+            for (var i=0; i<_data.length; i++) {
+                var el = _data[i];
                 var label = el["Label"]["Name"].toLowerCase();
                 var confidence = parseFloat(el["Label"]["Confidence"])
                 if (confidence >= 97.5) {
@@ -61,8 +63,8 @@ $(document).ready(function() {
             markers.forEach(i => addMarker(video, i));
 
             // hack
-            if (treatment == 2) {
-                frameUrls.forEach((e, i) => addIm(markers[i], e));
+            if (_treatment == 2) {
+                frameUrls.forEach((e, i) => addIm(i, markers[i], e, parseInt(_duration / 1000)));
                 $("#search-images .thumbnail").hover(function() {
                     $(this).find(".thumbnail-overlay").show();
                 }, function() {
