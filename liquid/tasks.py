@@ -6,10 +6,40 @@ import time
 from . import s3, celery
 from .models import Liquid
 from .db import db_session
+from .rekognition import get_sqs_message, VideoDetector
+
+
+@celery.on_after_configure.connect
+def setup_periodic_tasks(sender, **kwargs):
+    """ This function sets up Celery Beat """
+    sender.add_periodic_task(
+        60.0, check_sqs.s(), name="check SQS queue every minute"
+    )
+
+
+@celery.task(name="app.tasks.check_sqs")
+def check_sqs():
+    """This task is called periodically by celery beat to check
+    for new messages in an AWS SQS queue. The queue is subscribed
+    to a SNS channel that gets notified when a rekognition task
+    is completed.
+
+    If message is found in queue, then get rekognition results
+    based on the rekognition job id.
+    """
+
+    def get_rek_results(job_id):
+        detector = VideoDetector(job_id)
+        if not detector.get_results():
+            process_job_data.apply_async(args=[detector.labels, job_id])
+
+    get_sqs_message(get_rek_results)
+    return "done"
 
 
 @celery.task(name="app.tasks.celery_test")
 def celery_test(message):
+    """ DEV ONLY """
     # randomly update something in the db show that connections works
     liquid = Liquid.query.filter(Liquid.id == 3).first()
     liquid.active = True

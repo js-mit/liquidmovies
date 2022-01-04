@@ -1,21 +1,48 @@
 # Development
 
-> Run the following commands inside the cloned repo
+There are two ways to develop:
+- Using docker-compose to manage our docker environment (recommended)
+- Working directly with docker conatiners
 
-## Create a user-defined bridge network
+## Develop with Docker-compose (recommended)
+
+> This method requires that docker-compose is installed on your development machine
+
+Run the following code in the root directory of the cloned repo:
+```
+sudo docker-compose up
+```
+
+Since the files in your local directory are mounted onto the docker conatiners, editting local files will take effect without having to restart the docker compose.
+
+To stop your development environment, <ctrl-c> to escape. Run the following to stop and remove containers, networks, volume, etc:
+```
+sudo docker-compose down
+```
+
+> If a docker-compose error occurs, try restarting with `sudo docker-compose restart`
+
+
+## Manually manage your docker environments
+
+This method may be preferable for debugging individual elements of the docker compose architecture.
+
+Run the following commands inside the cloned repo.
+
+### Create a user-defined bridge network
 A user-defined bridge network allows different containers to talk to each other.
 ```
 sudo docker network create liquid-network
 ```
 
-## Run redis in a container
+### Run redis in a container
 We need to run a redis server, connect it to our docker network
 ```
 sudo docker run --name liquid-redis --net liquid-network -d redis
 ```
 > Since our redis container is called `liquid-redis`, make sure to name env variables appropriately, ie. `CELERY_BROKER_URL=redis://liquid-redis:6379/0`
 
-## Create the app container
+### Create the app container
 Run the main application through docker, connect it to the docker network
 
 ```
@@ -27,7 +54,7 @@ If the container is already running, then you can enter the container using the 
 sudo docker exec -it liquid-app bash
 ```
 
-## Container setup
+### Container setup
 Once inside the `liquid-app` container, we need to install some basic libraries
 ```
 apt-get -y update && apt-get -y upgrade
@@ -52,13 +79,24 @@ Navigate to where the appplication is (`/home`) and run the app
 flask run --port 8000 --host=0.0.0.0
 ```
 
-## Celery
+### Celery
 
-To run celery, enter the liquid-app container and run
+To run Celery, enter the liquid-app container and run:
 ```
 celery -A celery_worker.celery worker --pool=solo --loglevel=info
 ```
 > It is suggested that the celery worker is kicked off before the `flask run` command is called
+
+
+To run Celery Beat, enter the liquid-app container and run:
+```
+celery -A celery_worker.celery beat --loglevel=info
+```
+
+To monitor Celery tasks, run Flower inside the liquid-app container as well:
+```
+celery -A celery_worker.celery flower --address=0.0.0.0 --port=8001
+```
 
 ## Dev standard
 
@@ -83,8 +121,6 @@ sqlite3 instance/liquid.db
 ```
 
 # Deployment
-
-> TODO, use Docker-compose to manage redis, celery and flask
 
 Deploy to lightsail.
 
