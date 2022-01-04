@@ -6,6 +6,8 @@ There are two ways to run the application for development purposes:
 
 Before running either, make sure the `.env` file is filled out and placed into the root directory.
 
+The main web application runs on `localhost:8000`. Flower (celery task monitor) runs on `localhost:8001`.
+
 ## Docker-compose (recommended)
 
 > This method requires that docker-compose is installed on your development machine
