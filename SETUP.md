@@ -117,16 +117,29 @@ celery -A celery_worker.celery flower --address=0.0.0.0 --port=8001
 ----------------------------------------------------------------------------------------------------------------
  
 Running the following lines in terminal will also open up the Docker:
+  
 1.) git clone https://github.com/js-mit/liquidmovies
+  
 2.) cd liquidmovies/
+  
 3.) sudo docker run --name dev-liquid -v /"$(pwd)":/home -p 8000-8999:8000-8999 --shm-size=2gb --interactive --tty --rm python:3.9 bash
+  
 4.) apt-get update && apt-get upgrade
+  
 apt-get install sqlite3 libsqlite3-dev
+  
 5.) cd home
+  
 6.) pip install -r requirements.txt
+  
 7.) export FLASK_APP=liquid
+  
 export FLASK_ENV=development
+  
 8.) pip install email_validator
+  
 9.) python init_db.py
+  
 12.) touch .env
+  
 13.) flask run --port 8000 --host=0.0.0.0
