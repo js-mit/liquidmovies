@@ -1,3 +1,4 @@
+JS EDIT
 # Development
 
 There are two ways to run the application for development purposes:
