@@ -130,7 +130,7 @@ def _process_image_search(data, liquid):
         prev_timestamp = timestamp
 
     key = f"{path}/data.json"
-    s3.put_object(
+    success = s3.put_object(
         obj=json.dumps(data),
         key=key,
         content_type="application/json",

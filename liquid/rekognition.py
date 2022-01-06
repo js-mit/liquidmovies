@@ -88,7 +88,6 @@ class VideoDetector:
             )
 
             self.labels.extend(response["Labels"])
-            self.duration = str(response["VideoMetadata"]["DurationMillis"])
 
             if "NextToken" in response:
                 pagination_token = response["NextToken"]
