@@ -12,19 +12,19 @@ init_db()
 """
 Create Videos
 """
-v1 = Video(
-    url="https://liquidmovies.s3.amazonaws.com/dev/videos/lecture/video.mp4",
-    name="Introduction to Power and Politics in Today’s World",
-    poster_url="https://liquidmovies.s3.amazonaws.com/dev/videos/lecture/poster.png",
-    desc="A lecture by xyz about political science at Yale.",
-)
-v2 = Video(
-    url="https://liquidmovies.s3.amazonaws.com/dev/videos/our-planet/video.mp4",
-    name="Our Planet - From Deserts to Grasslands (Netflix)",
-    poster_url="https://liquidmovies.s3.amazonaws.com/dev/videos/our-planet/poster.png",
-    desc="Learn about the animals on our planet. So amaze!",
-)
-db_session.add_all([v1, v2])
+# v1 = Video(
+#     url="https://liquidmovies.s3.amazonaws.com/dev/videos/lecture/video.mp4",
+#     name="Introduction to Power and Politics in Today’s World",
+#     poster_url="https://liquidmovies.s3.amazonaws.com/dev/videos/lecture/poster.png",
+#     desc="A lecture by xyz about political science at Yale.",
+# )
+# v2 = Video(
+#     url="https://liquidmovies.s3.amazonaws.com/dev/videos/our-planet/video.mp4",
+#     name="Our Planet - From Deserts to Grasslands (Netflix)",
+#     poster_url="https://liquidmovies.s3.amazonaws.com/dev/videos/our-planet/poster.png",
+#     desc="Learn about the animals on our planet. So amaze!",
+# )
+# db_session.add_all([v1, v2])
 
 
 """
@@ -56,17 +56,17 @@ db_session.add_all([t1, t2])
 """
 Create Liquids
 """
-l1 = Liquid(
-    video_id=1,
-    url="https://liquidmovies.s3.amazonaws.com/dev/videos/lecture/liquids/1/data.json",
-    treatment_id=1,
-)
-l2 = Liquid(
-    video_id=2,
-    url="https://liquidmovies.s3.amazonaws.com/dev/videos/our-planet/liquids/2/data.json",
-    treatment_id=2,
-)
-db_session.add_all([l1, l2])
+# l1 = Liquid(
+#     video_id=1,
+#     url="https://liquidmovies.s3.amazonaws.com/dev/videos/lecture/liquids/1/data.json",
+#     treatment_id=1,
+# )
+# l2 = Liquid(
+#     video_id=2,
+#     url="https://liquidmovies.s3.amazonaws.com/dev/videos/our-planet/liquids/2/data.json",
+#     treatment_id=2,
+# )
+# db_session.add_all([l1, l2])
 
 
 """
@@ -74,8 +74,8 @@ Create a user
 """
 u = User(email="tester1@gmail.com")
 u.set_password("viralviral")
-u.liquids.append(l1)
-u.liquids.append(l2)
+# u.liquids.append(l1)
+# u.liquids.append(l2)
 db_session.add(u)
 
 
