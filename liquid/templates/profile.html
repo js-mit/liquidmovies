@@ -36,6 +36,12 @@
     {% else %}
     <div>
         Processing - Liquid: {{ liquid.id }} | Video: {{ liquid.video.name }} | Treatment: {{ liquid.treatment }} | Desc: {{ liquid.video.desc }} | User: {{ liquid.user_id }}
+        <div>
+            <a href="{{ url_for('delete_liquid', liquid_id=liquid.id) }}">
+                (del)
+            </a>
+        </div>
+
     </div>
 
     {% endif %}

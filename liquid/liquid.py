@@ -39,7 +39,7 @@ def delete_liquid(liquid_id):
     liquid.active = False
     db_session.add(liquid)
     db_session.commit()
-    return redirect(url_for("index"))
+    return redirect(url_for("profile"))
 
 
 @app.route("/liquid/job/<job_id>")
@@ -137,7 +137,7 @@ def upload_liquid():
             video=f"{s3_path}/video.mp4",
             treatment_id=form.treatment_id.data,
         )
-        submitter.do_label_detection()
+        submitter.do_detection()
 
         # update Liquid with job id
         liquid.job_id = submitter.job_id
