@@ -53,14 +53,41 @@ class VideoSubmitter:
             TopicArn=self.sns_topic_arn, Protocol="sqs", Endpoint=self.sqs_queue_arn
         )
 
-    def do_label_detection(self):
+    def do_detection(self):
+        """ TODO """
+        if self.treatment_id == 1:
+            pass
+        elif self.treatment_id == 2:
+            self._do_image_detection()
+        elif self.treatment_id == 3:
+            self._do_text_detection()
+        else:
+            print("invalid treatment id")
+
+    def _do_image_detection(self):
+        """TODO
+        Labels generic images...
+        """
         response = aws_rek.start_label_detection(
             Video={"S3Object": {"Bucket": self.bucket, "Name": self.video}},
             NotificationChannel={
                 "RoleArn": self.role_arn,
                 "SNSTopicArn": self.sns_topic_arn,
             },
-            JobTag="liquid",
+            JobTag="liquid-label-detection",
+        )
+
+        self.job_id = response["JobId"]
+
+    def _do_text_detection(self):
+        """ Searches for text in the video. """
+        response = aws_rek.start_text_detection(
+            Video={"S3Object": {"Bucket": self.bucket, "Name": self.video}},
+            NotificationChannel={
+                "RoleArn": self.role_arn,
+                "SNSTopicArn": self.sns_topic_arn,
+            },
+            JobTag="liquid-text-detection",
         )
 
         self.job_id = response["JobId"]
@@ -68,13 +95,28 @@ class VideoSubmitter:
 
 class VideoDetector:
     job_id = ""
+    treatment_id = None
     labels = []
     duration = 0
 
-    def __init__(self, job_id):
+    def __init__(self, job_id, treatment_id):
         self.job_id = job_id
+        self.treatment_id = treatment_id
 
     def get_results(self):
+        """TODO"""
+        if self.treatment_id == 1:
+            pass
+        elif self.treatment_id == 2:
+            return self._get_image_detection_results()
+        elif self.treatment_id == 3:
+            return self._get_text_detection_results()
+        else:
+            print("Invalid treatment")
+            return None
+
+    def _get_image_detection_results(self):
+        """TODO"""
         pagination_token = ""
         finished = False
 
@@ -88,6 +130,26 @@ class VideoDetector:
             )
 
             self.labels.extend(response["Labels"])
+
+            if "NextToken" in response:
+                pagination_token = response["NextToken"]
+            else:
+                finished = True
+
+    def _get_text_detection_results(self):
+        """TODO"""
+        pagination_token = ""
+        finished = False
+
+        while finished == False:
+
+            response = aws_rek.get_text_detection(
+                JobId=self.job_id,
+                MaxResults=500,
+                NextToken=pagination_token,
+            )
+
+            self.labels.extend(response["TextDetections"])
 
             if "NextToken" in response:
                 pagination_token = response["NextToken"]

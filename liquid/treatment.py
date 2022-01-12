@@ -15,6 +15,8 @@ def render_data(data, treatment_id):
         results = _render_speech_search(data)
     elif treatment_id == 2:
         results = _render_image_search(data)
+    elif treatment_id == 3:
+        results = _render_text_search(data)
     else:
         print("Error - treatment id not found")
 
@@ -27,5 +29,10 @@ def _render_speech_search(data):
 
 
 def _render_image_search(data):
+    # TODO
+    return data
+
+
+def _render_text_search(data):
     # TODO
     return data

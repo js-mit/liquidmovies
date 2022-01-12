@@ -27,7 +27,8 @@ def check_sqs():
     """
 
     def get_rek_results(job_id):
-        detector = VideoDetector(job_id)
+        liquid = Liquid.query.filter(Liquid.job_id == job_id).first()
+        detector = VideoDetector(job_id, liquid.treatment_id)
         if not detector.get_results():
             process_job_data.apply_async(args=[detector.labels, job_id])
 
@@ -63,6 +64,8 @@ def process_job_data(data, job_id):
         success = _process_speech_search(data, liquid)
     elif liquid.treatment_id == 2:
         success = _process_image_search(data, liquid)
+    elif liquid.treatment_id == 3:
+        success = _process_text_search(data, liquid)
     else:
         print("Error - treatment id not found")
     return success
@@ -141,6 +144,40 @@ def _process_image_search(data, liquid):
 
     print(f"Total of {get_frame_time} seconds to get frames from opencv")
     print(f"Total of {upload_frame_time} seconds to upload frame")
+
+    # update db entry
+    liquid.processing = False
+    liquid.url = s3.get_object_url(key)
+    db_session.add(liquid)
+    db_session.commit()
+
+    return True
+
+
+def _process_text_search(data, liquid):
+    """Process text detector results from rekognition
+
+    #TODO convert print lines to log statements
+
+    1. add data to s3
+    2. update db with new liquid attributes
+
+    Args:
+        data: results from rekognition job
+        liquid: liquid object
+    Returns:
+        success
+    """
+    path = s3.get_s3_liquid_path(liquid.user_id, liquid.video.id, liquid.id)
+    key = f"{path}/data.json"
+    success = s3.put_object(
+        obj=json.dumps(data),
+        key=key,
+        content_type="application/json",
+    )
+    if not success:
+        print("Error uploading json file.")
+        return False
 
     # update db entry
     liquid.processing = False

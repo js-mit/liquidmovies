@@ -46,11 +46,16 @@ t1 = Treatment(
     controller_id=3,
 )
 t2 = Treatment(
-    name="image-search",
-    desc="ctrl-f with images using default rekcognition-provided labels",
+    name="image-detection",
+    desc="ctrl-f on images using default rekognition label-detection api",
     controller_id=3,
 )
-db_session.add_all([t1, t2])
+t3 = Treatment(
+    name="text-detection",
+    desc="ctrl-f on text in video using rekognition text-detection api",
+    controller_id=3,
+)
+db_session.add_all([t1, t2, t3])
 
 
 """

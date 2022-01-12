@@ -49,27 +49,42 @@ $(document).ready(function() {
         var markers = [];
         var frameUrls = [];
         if (string) {
-            for (var i=0; i<_data.length; i++) {
-                var el = _data[i];
-                var label = el["Label"]["Name"].toLowerCase();
-                var confidence = parseFloat(el["Label"]["Confidence"])
-                if (confidence >= 97.5) {
-                    if (label.includes(string.toLowerCase())) {
-                        markers.push(parseInt(el["Timestamp"])/1000);
-                        frameUrls.push(el["FrameURL"])
+            if (_treatment == 2) {
+                // set up markers
+                for (var i=0; i<_data.length; i++) {
+                    var el = _data[i];
+                    var label = el["Label"]["Name"].toLowerCase();
+                    var confidence = parseFloat(el["Label"]["Confidence"])
+                    if (confidence >= 97.5) {
+                        if (label.includes(string.toLowerCase())) {
+                            markers.push(parseInt(el["Timestamp"])/1000);
+                            frameUrls.push(el["FrameURL"])
+                        }
                     }
                 }
-            }
-            markers.forEach(i => addMarker(video, i));
+                markers.forEach(i => addMarker(video, i));
 
-            // hack
-            if (_treatment == 2) {
+                // set up thumbnail frames
                 frameUrls.forEach((e, i) => addIm(i, markers[i], e, parseInt(_duration / 1000)));
                 $("#search-images .thumbnail").hover(function() {
                     $(this).find(".thumbnail-overlay").show();
                 }, function() {
                     $(this).find(".thumbnail-overlay").hide();
                 });
+            } else if (_treatment == 3) {
+                // set up markers
+                for (var i=0; i<_data.length; i++) {
+                    var el = _data[i];
+                    var label = el["TextDetection"]["DetectedText"].toLowerCase();
+                    var confidence = parseFloat(el["TextDetection"]["Confidence"])
+                    if (confidence >= 97.5) {
+                        if (label.includes(string.toLowerCase())) {
+                            markers.push(parseInt(el["Timestamp"])/1000);
+                            frameUrls.push(el["FrameURL"])
+                        }
+                    }
+                }
+                markers.forEach(i => addMarker(video, i));
             }
         }
     });
