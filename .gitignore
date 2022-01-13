@@ -21,3 +21,6 @@ build/
 celerybeat-schedule
 
 .env
+
+# any .pem keys
+*.pem

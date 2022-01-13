@@ -24,9 +24,12 @@
     {% for liquid in liquids %}
     {% if liquid.processing == False %}
     <div>
+        <img style="width:300px;height:auto" src="{{ liquid.video.poster_url }}">
+        <div>
         <a href="{{ url_for('liquid', liquid_id=liquid.id) }}">
             Liquid: {{ liquid.id }} | Video: {{ liquid.video.name }} | Treatment: {{ liquid.treatment }} | Desc: {{ liquid.video.desc }} | User: {{ liquid.user_id }}
         </a>
+        </div>
     </div>
     <div>
         <a href="{{ url_for('delete_liquid', liquid_id=liquid.id) }}">
@@ -47,7 +50,5 @@
     {% endif %}
     <hr>
     {% endfor %}
-
-    <a href="{{ url_for('upload_liquid') }}"><button>Upload Video</button></a>
 
 {% endblock %}
