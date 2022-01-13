@@ -101,7 +101,7 @@ def upload_liquid():
         success = s3.upload_fileobj(
             obj=form.poster.data,
             key=f"{s3_path}/poster.{ext}",
-            content_type="image/{ext}",
+            content_type=f"image/{ext}",
         )
         if not success:
             flash("Upload poster failed.")
