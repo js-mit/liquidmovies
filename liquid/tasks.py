@@ -1,3 +1,5 @@
+from typing import Mapping, Iterable, Union
+
 import cv2
 import json
 import time
@@ -16,7 +18,7 @@ def setup_periodic_tasks(sender, **kwargs):
 
 
 @celery.task(name="app.tasks.check_sqs")
-def check_sqs():
+def check_sqs() -> str:
     """This task is called periodically by celery beat to check
     for new messages in an AWS SQS queue. The queue is subscribed
     to a SNS channel that gets notified when a rekognition task
@@ -37,19 +39,18 @@ def check_sqs():
 
 
 @celery.task(name="app.tasks.celery_test")
-def celery_test(message):
+def celery_test(message: str) -> str:
     """ DEV ONLY """
     # randomly update something in the db show that connections works
     liquid = Liquid.query.filter(Liquid.id == 3).first()
     liquid.active = True
     db_session.add(liquid)
     db_session.commit()
-    print(liquid.treatment_id)
     return "done"
 
 
 @celery.task(name="app.tasks.process_job_data")
-def process_job_data(data, job_id):
+def process_job_data(data: Union[Mapping, Iterable], job_id: str) -> bool:
     """Preprocess data based on treatment id
 
     Args:
@@ -71,11 +72,11 @@ def process_job_data(data, job_id):
     return success
 
 
-def _process_speech_search(data, liquid):
+def _process_speech_search(data: Union[Mapping, Iterable], liquid: Liquid) -> None:
     return None
 
 
-def _process_image_search(data, liquid):
+def _process_image_search(data: Union[Mapping, Iterable], liquid: Liquid) -> bool:
     """Process label detector results from rekognition
 
     #TODO convert print lines to log statements
@@ -154,7 +155,7 @@ def _process_image_search(data, liquid):
     return True
 
 
-def _process_text_search(data, liquid):
+def _process_text_search(data: Union[Mapping, Iterable], liquid: Liquid) -> bool:
     """Process text detector results from rekognition
 
     #TODO convert print lines to log statements

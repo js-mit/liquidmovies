@@ -31,11 +31,16 @@ def profile():
 
 
 @app.route("/video/<int:video_id>")
-def raw_video(video_id):
+def raw_video(video_id: int):
     video = Video.query.filter(Video.id == video_id, Video.active == True).first()
     if video is None:
         abort(404)
     return render_template("raw_video.html", video=video)
+
+
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db_session.remove()
 
 
 # testing celery!
@@ -43,8 +48,3 @@ def raw_video(video_id):
 def celery():
     celery_test.apply_async(args=["hi"])
     return "success"
-
-
-@app.teardown_appcontext
-def shutdown_session(exception=None):
-    db_session.remove()

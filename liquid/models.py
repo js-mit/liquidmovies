@@ -15,7 +15,6 @@ from .db import Base
 
 
 class User(UserMixin, Base):
-    """User account model."""
 
     __tablename__ = "user"
 
@@ -29,20 +28,19 @@ class User(UserMixin, Base):
 
     liquids = relationship("Liquid", backref="user")
 
-    def set_password(self, password):
+    def set_password(self, password: str):
         """Create hashed password."""
         self.password = generate_password_hash(password, method="sha256")
 
-    def check_password(self, password):
+    def check_password(self, password: str) -> bool:
         """Check hashed password."""
         return check_password_hash(self.password, password)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<User {}>".format(self.email)
 
 
 class Video(Base):
-    """ TODO """
 
     __tablename__ = "video"
 
@@ -62,7 +60,6 @@ class Video(Base):
 
 
 class Liquid(Base):
-    """ TODO """
 
     __tablename__ = "liquid"
 
@@ -84,7 +81,6 @@ class Liquid(Base):
 
 
 class Treatment(Base):
-    """ TODO """
 
     __tablename__ = "treatment"
 
@@ -100,7 +96,6 @@ class Treatment(Base):
 
 
 class Controller(Base):
-    """ TODO """
 
     __tablename__ = "controller"
 

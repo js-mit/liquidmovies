@@ -1,7 +1,10 @@
 """ Consider renaming this file or reorganizing the functions within it """
+from typing import Mapping, Iterable, Union
 
 
-def render_data(data, treatment_id):
+def render_data(
+    data: Union[Mapping, Iterable], treatment_id: int
+) -> Union[Mapping, Iterable]:
     """Render data for the frontend based on treatment id
 
     Args:

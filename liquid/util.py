@@ -1,15 +1,22 @@
+import numpy as np
+from io import BytesIO
 import cv2
-import io
 
 
-def numpy_to_binary(arr):
-    """ Convert video from numpy array to a binary object in memory """
+def numpy_to_binary(arr: np.ndarray) -> BytesIO:
+    """Convert video from numpy array to a binary object in memory
+
+    Args:
+        arr: numpy array representing the image
+    Returns:
+        Image as bytes
+    """
     _, buffer = cv2.imencode(".jpg", arr)
-    io_buf = io.BytesIO(buffer)
+    io_buf = BytesIO(buffer)
     return io_buf
 
 
-def get_duration_and_frame_count(video_path):
+def get_duration_and_frame_count(video_path: str) -> [int, int]:
     """Get duration and frame from video using opencv
 
     TODO: consider switching to using cv2.CAP_PROP_POS_MSEC
@@ -17,7 +24,6 @@ def get_duration_and_frame_count(video_path):
 
     Args:
         video_path: path to video (can be a url)
-
     Returns:
         duration, frame_count
     """
