@@ -1,3 +1,4 @@
+from typing import Optional
 from flask import current_app as app
 from flask_login import login_required, logout_user, current_user, login_user
 from flask import render_template, request, redirect, url_for, flash
@@ -8,8 +9,14 @@ from . import login_manager
 
 
 @login_manager.user_loader
-def load_user(user_id):
-    """Check if user is logged-in on every page load."""
+def load_user(user_id: int) -> Optional[User]:
+    """Check if user is logged-in on every page load.
+
+    Args:
+        user_id: id of user
+    Returns:
+        user
+    """
     if user_id is not None:
         return User.query.get(user_id)
     return None
@@ -91,10 +98,12 @@ def logout():
 
 
 @login_manager.user_loader
-def user_loader(user_id):
+def user_loader(user_id: int) -> User:
     """Given *user_id*, return the associated User object.
 
     Args:
         user_id: user_id user to retrieve
+    Returns
+        User
     """
     return User.query.get(user_id)

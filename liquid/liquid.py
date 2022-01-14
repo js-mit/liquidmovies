@@ -14,12 +14,15 @@ from .util import get_duration_and_frame_count
 
 
 @app.route("/liquid/<int:liquid_id>")
-def liquid(liquid_id):
+def liquid(liquid_id: int):
     """Get Liquid Video based on liquid id
 
     1. Download liquid data from s3 bucket
     2. Process data based on treatment type
     3. Render page with data
+
+    Args:
+        liquid_id: liquid id
     """
     liquid = Liquid.query.filter(Liquid.id == liquid_id, Liquid.active == True).first()
 
@@ -34,7 +37,12 @@ def liquid(liquid_id):
 
 @app.route("/liquid/delete/<int:liquid_id>")
 @login_required
-def delete_liquid(liquid_id):
+def delete_liquid(liquid_id: int):
+    """Delete a liquid entry by setting it to inactive in the database.
+
+    Args:
+        liquid_id: liquid id
+    """
     liquid = Liquid.query.filter(Liquid.id == liquid_id).first()
     liquid.active = False
     db_session.add(liquid)
@@ -44,11 +52,14 @@ def delete_liquid(liquid_id):
 
 @app.route("/liquid/job/<job_id>")
 @login_required
-def get_liquid_job(job_id):
+def get_liquid_job(job_id: str):
     """Gets job results from Rekcognition
 
     1. get results from Rekcognition API
     2. and send to celery job
+
+    Args:
+        job_id: job id for video processing task
     """
     # get results from rekognition
     detector = VideoDetector(job_id)
