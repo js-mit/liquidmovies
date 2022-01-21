@@ -83,74 +83,51 @@ class VideoSubmitter:
             TopicArn=self.sns_topic_arn, Protocol="sqs", Endpoint=self.sqs_queue_arn
         )
 
-    def text_transcription(self):
-        """Calls AWS Rekognition to create captions for the video."""
-        video_uri = s3.get_object_url(self.video)
+    # TODO - move to processing stage
+    # def time_into_milliseconds(self, time_string):
+    #     """Utility function to turn time string into milliseconds"""
+    #     hours = int(time_string[:2])
+    #     mins = int(time_string[3:5])
+    #     seconds = float(time_string[6:])
+    #     return int(hours * 3600000 + mins * 60000 + seconds * 1000)
 
-        response = aws_trs.start_transcription_job(
-            TranscriptionJobName="george-test-2",
-            Media={"MediaFileUri": video_uri},
-            MediaFormat="mp4",  #
-            LanguageCode="en-US",
-            Subtitles={"Formats": ["vtt"]},
-            OutputBucketName=self.bucket,
-            OutputKey=s3.get_s3_liquid_path(
-                self.liquid.user_id, self.liquid.video_id, self.liquid.id
-            ),
-        )
+    # def make_caption_dict(self, vtt):
+    #     """Makes a JSON dictionary from AWS transcribed vtt into a JSON dictionary"""
 
-        # while True:
-        #    status = aws_trs.get_transcription_job(TranscriptionJobName=self.video)
-        #    if status['TranscriptionJob']['TranscriptionJobStatus'] in ['COMPLETED', 'FAILED']:
-        #        break
-        #    time.sleep(10)
+    #     file = vtt[
+    #         "Body"
+    #     ]  # ?????? do something to turn s3 bucket with .vtt uri into file name | format: "samplevtt.vtt"
 
-        # return status['TranscriptionJob']['Subtitles']['SubtitleFileUris'] #s3 bucket with .vtt file uri
+    #     if file[-4:] == ".vtt":
+    #         captions = webvtt.read(file)
+    #     else:
+    #         if file[-4:] == ".srt":
+    #             captions = webvtt.from_srt(file)
+    #         elif file[-4:] == ".sbv":
+    #             captions = webvtt.from_sbv(file)
+    #         else:
+    #             return "File format not accepted"
 
-    def time_into_milliseconds(self, time_string):
-        """Utility function to turn time string into milliseconds"""
-        hours = int(time_string[:2])
-        mins = int(time_string[3:5])
-        seconds = float(time_string[6:])
-        return int(hours * 3600000 + mins * 60000 + seconds * 1000)
+    #     word_locations = dict()
 
-    def make_caption_dict(self, vtt):
-        """Makes a JSON dictionary from AWS transcribed vtt into a JSON dictionary"""
+    #     for line in captions:
+    #         total_time = dt.strptime(line.start, "%H:%M:%S.%f")
+    #         text = (
+    #             line.text.translate(str.maketrans("", "", string.punctuation))
+    #             .lower()
+    #             .split()
+    #         )
+    #         time_interval = dt.strptime(line.end, "%H:%M:%S.%f") - dt.strptime(
+    #             line.start, "%H:%M:%S.%f"
+    #         )
+    #         for i in range(len(text)):
+    #             curr_time = (total_time + time_interval * i / len(text)).strftime(
+    #                 "%H:%M:%S.%f"
+    #             )
+    #             word_locations.setdefault(text[i], [])
+    #             word_locations[text[i]].append(self.time_into_milliseconds(curr_time))
 
-        file = vtt[
-            "Body"
-        ]  # ?????? do something to turn s3 bucket with .vtt uri into file name | format: "samplevtt.vtt"
-
-        if file[-4:] == ".vtt":
-            captions = webvtt.read(file)
-        else:
-            if file[-4:] == ".srt":
-                captions = webvtt.from_srt(file)
-            elif file[-4:] == ".sbv":
-                captions = webvtt.from_sbv(file)
-            else:
-                return "File format not accepted"
-
-        word_locations = dict()
-
-        for line in captions:
-            total_time = dt.strptime(line.start, "%H:%M:%S.%f")
-            text = (
-                line.text.translate(str.maketrans("", "", string.punctuation))
-                .lower()
-                .split()
-            )
-            time_interval = dt.strptime(line.end, "%H:%M:%S.%f") - dt.strptime(
-                line.start, "%H:%M:%S.%f"
-            )
-            for i in range(len(text)):
-                curr_time = (total_time + time_interval * i / len(text)).strftime(
-                    "%H:%M:%S.%f"
-                )
-                word_locations.setdefault(text[i], [])
-                word_locations[text[i]].append(self.time_into_milliseconds(curr_time))
-
-        return json.dumps(word_locations, indent=1)
+    #     return json.dumps(word_locations, indent=1)
 
     def do_detection(self):
         """Generic function that determines with kind of detection to call based
@@ -167,11 +144,20 @@ class VideoSubmitter:
 
     def _do_text_transcription(self):
         """Calls AWS Rekognition to create captions for the video."""
-        s3_bucket_with_vtt_uri = self.text_transcription()
-        json_with_word_to_timestamp_milli = self.make_caption_dict(
-            s3_bucket_with_vtt_uri
+        video_uri = s3.get_object_url(self.video)
+        job_id = f"transcription-service-{liquid.id}"
+        response = aws_trs.start_transcription_job(
+            TranscriptionJobName=job_id,
+            Media={"MediaFileUri": video_uri},
+            MediaFormat="mp4",
+            LanguageCode="en-US",
+            Subtitles={"Formats": ["vtt"]},
+            OutputBucketName=self.bucket,
+            OutputKey=s3.get_s3_liquid_path(
+                self.liquid.user_id, self.liquid.video_id, self.liquid.id
+            ),
         )
-        # Save JSON dictionary somewhere to be used in _get_text_transcription
+        self.job_id = job_id
 
     def _do_image_detection(self):
         """Calls AWS Rekognition label detection model to score each frame of

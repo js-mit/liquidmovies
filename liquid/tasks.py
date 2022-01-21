@@ -3,12 +3,16 @@ from typing import Mapping, Iterable, Union
 import cv2
 import json
 import time
+import boto3
 
 from . import s3, celery
 from .models import Liquid
 from .db import db_session
 from .rekognition import get_sqs_message, VideoDetector
 from .util import numpy_to_binary
+
+
+aws_trs = boto3.client("transcribe", region_name="us-east-1")
 
 
 @celery.on_after_configure.connect
@@ -19,13 +23,22 @@ def setup_periodic_tasks(sender, **kwargs):
 
 @celery.task(name="app.tasks.check_sqs")
 def check_sqs() -> str:
-    """This task is called periodically by celery beat to check
-    for new messages in an AWS SQS queue. The queue is subscribed
-    to a SNS channel that gets notified when a rekognition task
-    is completed.
+    """
+    Running on `Beat` thread
 
-    If message is found in queue, then get rekognition results
-    based on the rekognition job id.
+    This task is called periodically by celery beat to check
+    for when a video processing job is complete
+
+    Check rekognition results:
+    One scenario is checking for new messages in an AWS SQS queue.
+    The queue is subscribed to a SNS channel that gets notified
+    when a rekognition task is completed. If message is found in
+    queue, then get rekognition results based on the rekognition
+    job id.
+
+    Check transcriber results:
+    Another scenario is checking for new job completetion in the
+    transcriber service.
     """
 
     def get_rek_results(job_id):
@@ -34,7 +47,11 @@ def check_sqs() -> str:
         if not detector.get_results():
             process_job_data.apply_async(args=[detector.labels, job_id])
 
+    # check sqs for rekognition results
     get_sqs_message(get_rek_results)
+
+    # check transcriber service for results
+    # TODO write a function that tells `process_job_data` to get job data
     return "done"
 
 
@@ -73,6 +90,14 @@ def process_job_data(data: Union[Mapping, Iterable], job_id: str) -> bool:
 
 
 def _process_speech_search(data: Union[Mapping, Iterable], liquid: Liquid) -> None:
+    """ Process transcription output by converting to json format
+
+    1. get transcription vtt s3 bucket location
+    2. convert vtt to josn formation
+    3. upload json file to <liquid_path>, which we get using s3.get_s3_liquid_path
+
+    # TODO (look at `_process_text_search` as example)
+    """
     return None
 
 
