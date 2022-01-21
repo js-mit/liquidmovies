@@ -13,7 +13,7 @@ from .util import numpy_to_binary
 
 @celery.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):
-    """ This function sets up Celery Beat """
+    """This function sets up Celery Beat"""
     sender.add_periodic_task(60.0, check_sqs.s(), name="check SQS queue every minute")
 
 
@@ -40,7 +40,7 @@ def check_sqs() -> str:
 
 @celery.task(name="app.tasks.celery_test")
 def celery_test(message: str) -> str:
-    """ DEV ONLY """
+    """DEV ONLY"""
     # randomly update something in the db show that connections works
     liquid = Liquid.query.filter(Liquid.id == 3).first()
     liquid.active = True

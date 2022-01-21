@@ -48,3 +48,17 @@ def shutdown_session(exception=None):
 def celery():
     celery_test.apply_async(args=["hi"])
     return "success"
+
+
+import boto3
+
+aws_trs = boto3.client("transcribe", region_name="us-east-1")
+
+
+@app.route("/subtitles_test/<job_id>")
+def subtitles_test(job_id):
+    print("hello,here")
+    status = aws_trs.get_transcription_job(TranscriptionJobName=job_id)
+    if status["TranscriptionJob"]["TranscriptionJobStatus"] in ["COMPLETED", "FAILED"]:
+        return str(status["TranscriptionJob"]["Subtitles"]["SubtitleFileUris"])
+    print("hello,here too")

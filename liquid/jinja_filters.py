@@ -9,7 +9,7 @@ from flask import current_app as app
 
 @app.template_filter("render_timestamps")
 def render_timestamps(data):
-    """ Render timestamps """
+    """Render timestamps"""
     return map_nested_objs(data, convert)
 
 

@@ -1,11 +1,16 @@
 from typing import Callable
 import boto3
-import json
 from flask import current_app as app
 
+import webvtt, string, json
+from datetime import datetime as dt
+from datetime import timezone
+
+from . import s3
 
 aws_sqs_queue_url = app.config["AWS_SQS_QUEUE_URL"]
 aws_rek = boto3.client("rekognition", region_name="us-east-1")
+aws_trs = boto3.client("transcribe", region_name="us-east-1")
 aws_sns = boto3.client("sns", region_name="us-east-1")
 aws_sqs = boto3.client("sqs", region_name="us-east-1")
 
@@ -43,6 +48,7 @@ class VideoSubmitter:
     sns_topic_arn = ""
     sqs_queue_arn = ""
     treatment_id = ""
+    liquid = None
 
     def __init__(
         self,
@@ -52,6 +58,7 @@ class VideoSubmitter:
         bucket: str,
         video: str,
         treatment_id: int,
+        liquid: str,
     ):
         """
         Args:
@@ -61,6 +68,7 @@ class VideoSubmitter:
             bucket: the name of the s3 bucket where the video is located
             video: the path to the video in the s3 bucket
             treatment_id: the treatment id to determine which model to run
+            liquid: the liquid object to perform liquid operations
         """
         self.role_arn = role_arn
         self.sns_topic_arn = sns_topic_arn
@@ -68,24 +76,102 @@ class VideoSubmitter:
         self.bucket = bucket
         self.video = video
         self.treatment_id = treatment_id
+        self.liquid = liquid
 
         # subscribe the sqs to the sns topic (if not already)
         aws_sns.subscribe(
             TopicArn=self.sns_topic_arn, Protocol="sqs", Endpoint=self.sqs_queue_arn
         )
 
+    def text_transcription(self):
+        """Calls AWS Rekognition to create captions for the video."""
+        video_uri = s3.get_object_url(self.video)
+
+        response = aws_trs.start_transcription_job(
+            TranscriptionJobName="george-test-2",
+            Media={"MediaFileUri": video_uri},
+            MediaFormat="mp4",  #
+            LanguageCode="en-US",
+            Subtitles={"Formats": ["vtt"]},
+            OutputBucketName=self.bucket,
+            OutputKey=s3.get_s3_liquid_path(
+                self.liquid.user_id, self.liquid.video_id, self.liquid.id
+            ),
+        )
+
+        # while True:
+        #    status = aws_trs.get_transcription_job(TranscriptionJobName=self.video)
+        #    if status['TranscriptionJob']['TranscriptionJobStatus'] in ['COMPLETED', 'FAILED']:
+        #        break
+        #    time.sleep(10)
+
+        # return status['TranscriptionJob']['Subtitles']['SubtitleFileUris'] #s3 bucket with .vtt file uri
+
+    def time_into_milliseconds(self, time_string):
+        """Utility function to turn time string into milliseconds"""
+        hours = int(time_string[:2])
+        mins = int(time_string[3:5])
+        seconds = float(time_string[6:])
+        return int(hours * 3600000 + mins * 60000 + seconds * 1000)
+
+    def make_caption_dict(self, vtt):
+        """Makes a JSON dictionary from AWS transcribed vtt into a JSON dictionary"""
+
+        file = vtt[
+            "Body"
+        ]  # ?????? do something to turn s3 bucket with .vtt uri into file name | format: "samplevtt.vtt"
+
+        if file[-4:] == ".vtt":
+            captions = webvtt.read(file)
+        else:
+            if file[-4:] == ".srt":
+                captions = webvtt.from_srt(file)
+            elif file[-4:] == ".sbv":
+                captions = webvtt.from_sbv(file)
+            else:
+                return "File format not accepted"
+
+        word_locations = dict()
+
+        for line in captions:
+            total_time = dt.strptime(line.start, "%H:%M:%S.%f")
+            text = (
+                line.text.translate(str.maketrans("", "", string.punctuation))
+                .lower()
+                .split()
+            )
+            time_interval = dt.strptime(line.end, "%H:%M:%S.%f") - dt.strptime(
+                line.start, "%H:%M:%S.%f"
+            )
+            for i in range(len(text)):
+                curr_time = (total_time + time_interval * i / len(text)).strftime(
+                    "%H:%M:%S.%f"
+                )
+                word_locations.setdefault(text[i], [])
+                word_locations[text[i]].append(self.time_into_milliseconds(curr_time))
+
+        return json.dumps(word_locations, indent=1)
+
     def do_detection(self):
         """Generic function that determines with kind of detection to call based
         on treatment type.
         """
         if self.treatment_id == 1:
-            pass
+            self._do_text_transcription()
         elif self.treatment_id == 2:
             self._do_image_detection()
         elif self.treatment_id == 3:
             self._do_text_detection()
         else:
             print("invalid treatment id")
+
+    def _do_text_transcription(self):
+        """Calls AWS Rekognition to create captions for the video."""
+        s3_bucket_with_vtt_uri = self.text_transcription()
+        json_with_word_to_timestamp_milli = self.make_caption_dict(
+            s3_bucket_with_vtt_uri
+        )
+        # Save JSON dictionary somewhere to be used in _get_text_transcription
 
     def _do_image_detection(self):
         """Calls AWS Rekognition label detection model to score each frame of
@@ -134,9 +220,9 @@ class VideoDetector:
         self.treatment_id = treatment_id
 
     def get_results(self):
-        """ Generic function to get results of model based on treatment id. """
+        """Generic function to get results of model based on treatment id."""
         if self.treatment_id == 1:
-            pass
+            return self._get_transcription_results()
         elif self.treatment_id == 2:
             return self._get_image_detection_results()
         elif self.treatment_id == 3:
@@ -145,8 +231,14 @@ class VideoDetector:
             print("Invalid treatment")
             return None
 
+    def _get_transcription_results(self):
+        """Get text transcription results from aws."""
+        pass
+        # TODO_______________
+        # take JSON dictionary from _do_transcription_results and add to Labels??
+
     def _get_image_detection_results(self):
-        """ Get image detection result from aws. """
+        """Get image detection result from aws."""
         pagination_token = ""
         finished = False
 
@@ -167,7 +259,7 @@ class VideoDetector:
                 finished = True
 
     def _get_text_detection_results(self):
-        """ Get text detection result from aws. """
+        """Get text detection result from aws."""
         pagination_token = ""
         finished = False
 

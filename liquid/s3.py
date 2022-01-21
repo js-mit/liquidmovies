@@ -52,7 +52,7 @@ def get_object_url(key: str) -> str:
 
     Args:
         path: the object path
-        filanem: object filename
+        filename: object filename
     Return:
         url in string
     """
