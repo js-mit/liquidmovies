@@ -38,6 +38,7 @@ def get_sqs_message(cb: Callable):
             aws_sqs.delete_message(
                 QueueUrl=aws_sqs_queue_url, ReceiptHandle=message["ReceiptHandle"]
             )
+            print("here--------", message)
 
 
 class VideoSubmitter:
@@ -83,52 +84,6 @@ class VideoSubmitter:
             TopicArn=self.sns_topic_arn, Protocol="sqs", Endpoint=self.sqs_queue_arn
         )
 
-    # TODO - move to processing stage
-    # def time_into_milliseconds(self, time_string):
-    #     """Utility function to turn time string into milliseconds"""
-    #     hours = int(time_string[:2])
-    #     mins = int(time_string[3:5])
-    #     seconds = float(time_string[6:])
-    #     return int(hours * 3600000 + mins * 60000 + seconds * 1000)
-
-    # def make_caption_dict(self, vtt):
-    #     """Makes a JSON dictionary from AWS transcribed vtt into a JSON dictionary"""
-
-    #     file = vtt[
-    #         "Body"
-    #     ]  # ?????? do something to turn s3 bucket with .vtt uri into file name | format: "samplevtt.vtt"
-
-    #     if file[-4:] == ".vtt":
-    #         captions = webvtt.read(file)
-    #     else:
-    #         if file[-4:] == ".srt":
-    #             captions = webvtt.from_srt(file)
-    #         elif file[-4:] == ".sbv":
-    #             captions = webvtt.from_sbv(file)
-    #         else:
-    #             return "File format not accepted"
-
-    #     word_locations = dict()
-
-    #     for line in captions:
-    #         total_time = dt.strptime(line.start, "%H:%M:%S.%f")
-    #         text = (
-    #             line.text.translate(str.maketrans("", "", string.punctuation))
-    #             .lower()
-    #             .split()
-    #         )
-    #         time_interval = dt.strptime(line.end, "%H:%M:%S.%f") - dt.strptime(
-    #             line.start, "%H:%M:%S.%f"
-    #         )
-    #         for i in range(len(text)):
-    #             curr_time = (total_time + time_interval * i / len(text)).strftime(
-    #                 "%H:%M:%S.%f"
-    #             )
-    #             word_locations.setdefault(text[i], [])
-    #             word_locations[text[i]].append(self.time_into_milliseconds(curr_time))
-
-    #     return json.dumps(word_locations, indent=1)
-
     def do_detection(self):
         """Generic function that determines with kind of detection to call based
         on treatment type.
@@ -145,7 +100,7 @@ class VideoSubmitter:
     def _do_text_transcription(self):
         """Calls AWS Rekognition to create captions for the video."""
         video_uri = s3.get_object_url(self.video)
-        job_id = f"transcription-service-{liquid.id}"
+        job_id = f"transcription-service-{self.liquid.id}"
         response = aws_trs.start_transcription_job(
             TranscriptionJobName=job_id,
             Media={"MediaFileUri": video_uri},
@@ -158,6 +113,18 @@ class VideoSubmitter:
             ),
         )
         self.job_id = job_id
+
+        # Adding a message to queue for get_sqs_message function to pickup
+        # Send message to SQS queue
+        response = aws_sqs.send_message(
+            QueueUrl=aws_sqs_queue_url,
+            DelaySeconds=10,
+            MessageAttributes={
+                "Title": {"DataType": "String", "StringValue": "Hi"},
+            },
+            # TODO:EDIT THIS
+            MessageBody=(f'"Message": { "JobId": {job_id} }'),
+        )
 
     def _do_image_detection(self):
         """Calls AWS Rekognition label detection model to score each frame of
@@ -219,9 +186,15 @@ class VideoDetector:
 
     def _get_transcription_results(self):
         """Get text transcription results from aws."""
-        pass
-        # TODO_______________
-        # take JSON dictionary from _do_transcription_results and add to Labels??
+
+        response = aws_trs.get_transcription_job(TranscriptionJobName=liquid.job_id)
+        if response["TranscriptionJob"]["TranscriptionJobStatus"] not in [
+            "COMPLETED",
+            "FAILED",
+        ]:
+            return True
+        self.labels = response["TranscriptionJob"]["Subtitles"]["SubtitleFileUris"][0]
+        return False
 
     def _get_image_detection_results(self):
         """Get image detection result from aws."""

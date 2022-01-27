@@ -50,6 +50,7 @@ def celery():
     return "success"
 
 
+# Testing transcribe
 import boto3
 
 aws_trs = boto3.client("transcribe", region_name="us-east-1")
@@ -61,4 +62,3 @@ def subtitles_test(job_id):
     status = aws_trs.get_transcription_job(TranscriptionJobName=job_id)
     if status["TranscriptionJob"]["TranscriptionJobStatus"] in ["COMPLETED", "FAILED"]:
         return str(status["TranscriptionJob"]["Subtitles"]["SubtitleFileUris"])
-    print("hello,here too")
