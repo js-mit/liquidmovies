@@ -1,5 +1,6 @@
-from typing import Mapping, Iterable, Union
+from typing import Mapping, Iterable, Union, Any
 
+import os
 import cv2
 import json
 import time
@@ -37,14 +38,25 @@ def check_sqs() -> str:
 
     Check transcriber results:
     Another scenario is checking for new job completetion in the
-    transcriber service.
+    transcriber service. This also uses the SQS queue since we
+    push a new message to the queue after video is uploaded.
     """
 
-    def get_results(job_id):
+    def get_results(job_id: str) -> bool:
+        """Get results from VideoDetector
+
+        Args:
+            job_id: get results from this job_id
+        Returns:
+            True is results were found in detector, False otherwise
+        """
         liquid = Liquid.query.filter(Liquid.job_id == job_id).first()
         detector = VideoDetector(job_id, liquid.treatment_id)
-        if not detector.get_results():
-            process_job_data.apply_async(args=[detector.labels, job_id])
+        if detector.get_results():
+            process_job_data.apply_async(args=[detector.data, job_id])
+            return True
+        else:
+            return False
 
     # check sqs for rekognition results
     get_sqs_message(get_results)
@@ -64,7 +76,7 @@ def celery_test(message: str) -> str:
 
 
 @celery.task(name="app.tasks.process_job_data")
-def process_job_data(data: Union[Mapping, Iterable], job_id: str) -> bool:
+def process_job_data(data: Any, job_id: str) -> bool:
     """Preprocess data based on treatment id
 
     Args:
@@ -86,7 +98,7 @@ def process_job_data(data: Union[Mapping, Iterable], job_id: str) -> bool:
     return success
 
 
-def _process_speech_search(data: Union[Mapping, Iterable], liquid: Liquid) -> None:
+def _process_speech_search(data: string, liquid: Liquid) -> None:
     """Process transcription output by converting to json format
 
     1. get transcription vtt s3 bucket location
@@ -94,16 +106,21 @@ def _process_speech_search(data: Union[Mapping, Iterable], liquid: Liquid) -> No
     3. upload json file to <liquid_path>, which we get using s3.get_s3_liquid_path
 
     # TODO (look at `_process_text_search` as example)
+
+    Args:
+        data: location of vtt file
+        liquid: liquid object
+    Returns None
     """
 
-    def time_into_milliseconds(self, time_string):
+    def time_into_milliseconds(time_string):
         """Utility function to turn time string into milliseconds."""
         hours = int(time_string[:2])
         mins = int(time_string[3:5])
         seconds = float(time_string[6:])
         return int(hours * 3600000 + mins * 60000 + seconds * 1000)
 
-    def make_caption_dict(self, vtt):
+    def make_caption_dict(vtt):
         """Makes a JSON dictionary from AWS transcribed vtt into a JSON dictionary"""
 
         if vtt[-4:] == ".vtt":
@@ -119,26 +136,29 @@ def _process_speech_search(data: Union[Mapping, Iterable], liquid: Liquid) -> No
         word_locations = dict()
 
         for line in captions:
-            total_time = dt.strptime(line.start, "%H:%M:%S.%f")
+            total_time = dt.datetime.strptime(line.start, "%H:%M:%S.%f")
             text = (
                 line.text.translate(str.maketrans("", "", string.punctuation))
                 .lower()
                 .split()
             )
-            time_interval = dt.strptime(line.end, "%H:%M:%S.%f") - dt.strptime(
-                line.start, "%H:%M:%S.%f"
-            )
+            time_interval = dt.datetime.strptime(
+                line.end, "%H:%M:%S.%f"
+            ) - dt.datetime.strptime(line.start, "%H:%M:%S.%f")
             for i in range(len(text)):
                 curr_time = (total_time + time_interval * i / len(text)).strftime(
                     "%H:%M:%S.%f"
                 )
                 word_locations.setdefault(text[i], [])
-                word_locations[text[i]].append(self.time_into_milliseconds(curr_time))
+                word_locations[text[i]].append(time_into_milliseconds(curr_time))
 
         return word_locations
 
-    vtt = data
-    capt_dict = make_caption_dict(vtt)
+    # temporarily download vtt, remove after `make_caption_dict` is called
+    tmp_file = s3.download_file_by_url(data, "/tmp/tmp_vtt.vtt")
+    capt_dict = make_caption_dict(tmp_file)
+    os.remove(tmp_file)
+
     path = s3.get_s3_liquid_path(liquid.user_id, liquid.video.id, liquid.id)
     key = f"{path}/captions.json"
     success = s3.put_object(

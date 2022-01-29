@@ -27,18 +27,24 @@ def get_sqs_message(cb: Callable):
     )
     if "Messages" in sqs_response:
         for message in sqs_response["Messages"]:
-            # get rek_msg to get job_id
-            notification = json.loads(message["Body"])
-            rek_msg = json.loads(notification["Message"])
+            msg_body = json.loads(message["Body"])
 
-            # get results from rek using this cb
-            cb(rek_msg["JobId"])
+            # determine message type
+            job_id = None
+            if msg_body["Type"] == "Notification":
+                rek_msg = json.loads(msg_body["Message"])  # message from rekognition
+                job_id = rek_msg["JobId"]
+            elif msg_body["Type"] == "Default":
+                job_id = msg_body["JobId"]
+            else:
+                print("Invalid Message.")
+                return False
 
             # delete msg from queue
-            aws_sqs.delete_message(
-                QueueUrl=aws_sqs_queue_url, ReceiptHandle=message["ReceiptHandle"]
-            )
-            print("here--------", message)
+            if cb(job_id):
+                aws_sqs.delete_message(
+                    QueueUrl=aws_sqs_queue_url, ReceiptHandle=message["ReceiptHandle"]
+                )
 
 
 class VideoSubmitter:
@@ -115,15 +121,11 @@ class VideoSubmitter:
         self.job_id = job_id
 
         # Adding a message to queue for get_sqs_message function to pickup
-        # Send message to SQS queue
-        response = aws_sqs.send_message(
+        msg_body = {"Type": "Default", "JobId": job_id}
+        aws_sqs.send_message(
             QueueUrl=aws_sqs_queue_url,
             DelaySeconds=10,
-            MessageAttributes={
-                "Title": {"DataType": "String", "StringValue": "Hi"},
-            },
-            # TODO:EDIT THIS
-            MessageBody=(f'"Message": { "JobId": {job_id} }'),
+            MessageBody=json.dumps(msg_body),
         )
 
     def _do_image_detection(self):
@@ -160,7 +162,7 @@ class VideoSubmitter:
 class VideoDetector:
     job_id = ""
     treatment_id = None
-    labels = []
+    data = []
     duration = 0
 
     def __init__(self, job_id: str, treatment_id: int):
@@ -187,19 +189,20 @@ class VideoDetector:
     def _get_transcription_results(self):
         """Get text transcription results from aws."""
 
-        response = aws_trs.get_transcription_job(TranscriptionJobName=liquid.job_id)
+        response = aws_trs.get_transcription_job(TranscriptionJobName=self.job_id)
         if response["TranscriptionJob"]["TranscriptionJobStatus"] not in [
             "COMPLETED",
             "FAILED",
         ]:
-            return True
-        self.labels = response["TranscriptionJob"]["Subtitles"]["SubtitleFileUris"][0]
-        return False
+            return False
+        self.data = response["TranscriptionJob"]["Subtitles"]["SubtitleFileUris"][0]
+        return True
 
     def _get_image_detection_results(self):
         """Get image detection result from aws."""
         pagination_token = ""
         finished = False
+        self.data = []
 
         while finished == False:
 
@@ -210,17 +213,20 @@ class VideoDetector:
                 SortBy="TIMESTAMP",
             )
 
-            self.labels.extend(response["Labels"])
+            self.data.extend(response["Labels"])
 
             if "NextToken" in response:
                 pagination_token = response["NextToken"]
             else:
                 finished = True
 
+        return True
+
     def _get_text_detection_results(self):
         """Get text detection result from aws."""
         pagination_token = ""
         finished = False
+        self.data = []
 
         while finished == False:
 
@@ -230,9 +236,11 @@ class VideoDetector:
                 NextToken=pagination_token,
             )
 
-            self.labels.extend(response["TextDetections"])
+            self.data.extend(response["TextDetections"])
 
             if "NextToken" in response:
                 pagination_token = response["NextToken"]
             else:
                 finished = True
+
+        return True
