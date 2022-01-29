@@ -107,6 +107,20 @@ def upload_fileobj(obj: IOBase, key: str, content_type: str) -> bool:
     return True
 
 
+def download_file_by_url(url: str, file_name: str) -> str:
+    """Download file from s3 bucket to location
+
+    Args:
+        url: url to download from
+        file_name: name of file to download to
+    Returns:
+        The location of the file.
+    """
+    key = _get_key_from_url(url)
+    s3_client.download_file(s3_bucket, key, file_name)
+    return file_name
+
+
 def _download_liquid(key: str) -> Union[Mapping, Iterable]:
     """Get liquid data stored in s3 bucket
 
@@ -131,5 +145,29 @@ def download_liquid_by_key(key: str) -> Union[Mapping, Iterable]:
 
 
 def download_liquid_by_url(url: str) -> Union[Mapping, Iterable]:
-    key = urlparse(url).path[1:]
+    """download liquid by URL
+
+    Args:
+        url: to parse key for
+    Returns:
+        liquid data as object
+    """
+    key = _get_key_from_url(url)
     return _download_liquid(key)
+
+
+def _get_key_from_url(url: str) -> str:
+    """Get key from s3 url type
+
+    s3 url can be in two formats:
+        - https://s3.{location}.amazonaws.com/{bucket}/{key}
+        - https://{bucket}.amazonaws.com/{key}
+    Args:
+        url: s3 url
+    Returns
+        key
+    """
+    key = urlparse(url).path[1:]
+    if s3_bucket in key:
+        key = "/".join(key.split("/")[1:])
+    return key
