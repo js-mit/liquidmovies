@@ -38,7 +38,7 @@ def liquid(liquid_id: int):
     print("testtest")
     print(topwords)
 
-    return render_template("liquid.html", liquid=liquid, topwords=topwords)
+    return render_template("liquid.html", liquid=liquid, data=data, topwords=topwords)
 
 
 @app.route("/liquid/delete/<int:liquid_id>")
