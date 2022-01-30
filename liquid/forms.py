@@ -22,10 +22,7 @@ from wtforms.validators import (
 class UploadVideoForm(FlaskForm):
     """Upload Video Form."""
 
-    name = StringField(
-        "Name",
-        validators=[Length(min=3), DataRequired()],
-    )
+    name = StringField("Name", validators=[Length(min=3), DataRequired()],)
     poster = FileField(
         "Poster",
         validators=[
@@ -33,10 +30,7 @@ class UploadVideoForm(FlaskForm):
             FileAllowed(["png", "jpg"], "Wrong format. Must be .png or .jpg"),
         ],
     )
-    desc = TextAreaField(
-        "Description",
-        validators=[Optional()],
-    )
+    desc = TextAreaField("Description", validators=[Optional()],)
     video = FileField(
         "Video",
         validators=[
@@ -44,15 +38,8 @@ class UploadVideoForm(FlaskForm):
             FileAllowed(["mp4"], "Wrong format. Must be .mp4"),
         ],
     )
-    treatment_id = SelectField(
-        "Treatment",
-        coerce=int,
-        choices=[InputRequired()],
-    )
-    private = BooleanField(
-        "Private?",
-        validators=[],
-    )
+    treatment_id = SelectField("Treatment", coerce=int, choices=[InputRequired()],)
+    private = BooleanField("Private?", validators=[],)
     submit = SubmitField("Upload")
 
 

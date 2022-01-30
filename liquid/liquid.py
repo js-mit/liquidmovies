@@ -11,6 +11,7 @@ from .rekognition import VideoDetector, VideoSubmitter
 from .treatment import render_data
 from .tasks import process_job_data
 from .util import get_duration_and_frame_count
+from .topwords import gettopwords
 
 
 @app.route("/liquid/<int:liquid_id>")
@@ -32,7 +33,12 @@ def liquid(liquid_id: int):
     data = s3.download_liquid_by_url(liquid.url)
     data = render_data(data, liquid.treatment_id)
 
-    return render_template("liquid.html", liquid=liquid, data=data)
+    topnum = 10
+    topwords = gettopwords(data, topnum)
+    print("testtest")
+    print(topwords)
+
+    return render_template("liquid.html", liquid=liquid, topwords=topwords)
 
 
 @app.route("/liquid/delete/<int:liquid_id>")
@@ -99,9 +105,7 @@ def upload_liquid():
 
         # upload video
         success = s3.upload_fileobj(
-            obj=form.video.data,
-            key=f"{s3_path}/video.mp4",
-            content_type="video/mp4",
+            obj=form.video.data, key=f"{s3_path}/video.mp4", content_type="video/mp4",
         )
         if not success:
             flash("Upload Video failed.")

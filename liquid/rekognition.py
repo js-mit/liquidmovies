@@ -174,9 +174,7 @@ class VideoDetector:
         while finished == False:
 
             response = aws_rek.get_text_detection(
-                JobId=self.job_id,
-                MaxResults=500,
-                NextToken=pagination_token,
+                JobId=self.job_id, MaxResults=500, NextToken=pagination_token,
             )
 
             self.labels.extend(response["TextDetections"])
