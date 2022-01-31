@@ -3,8 +3,8 @@ from typing import Mapping, Iterable, Union
 import cv2
 import json
 import time
-import boto3
-import webvtt, string
+import webvtt
+import string
 import datetime as dt
 
 from . import s3, celery

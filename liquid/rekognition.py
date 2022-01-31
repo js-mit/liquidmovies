@@ -2,9 +2,7 @@ from typing import Callable
 import boto3
 from flask import current_app as app
 
-import webvtt, string, json
-from datetime import datetime as dt
-from datetime import timezone
+import json
 
 from . import s3
 
@@ -100,8 +98,8 @@ class VideoSubmitter:
     def _do_text_transcription(self):
         """Calls AWS Rekognition to create captions for the video."""
         video_uri = s3.get_object_url(self.video)
-        job_id = f"transcription-service-{self.liquid.id}"
-        response = aws_trs.start_transcription_job(
+        job_id = f"transcription-service-{self.liquid.id}-1923091232001"
+        aws_trs.start_transcription_job(
             TranscriptionJobName=job_id,
             Media={"MediaFileUri": video_uri},
             MediaFormat="mp4",
@@ -116,14 +114,14 @@ class VideoSubmitter:
 
         # Adding a message to queue for get_sqs_message function to pickup
         # Send message to SQS queue
-        response = aws_sqs.send_message(
+        aws_sqs.send_message(
             QueueUrl=aws_sqs_queue_url,
             DelaySeconds=10,
             MessageAttributes={
                 "Title": {"DataType": "String", "StringValue": "Hi"},
             },
             # TODO:EDIT THIS
-            MessageBody=(f'"Message": { "JobId": {job_id} }'),
+            MessageBody="new msg",
         )
 
     def _do_image_detection(self):
@@ -187,7 +185,7 @@ class VideoDetector:
     def _get_transcription_results(self):
         """Get text transcription results from aws."""
 
-        response = aws_trs.get_transcription_job(TranscriptionJobName=liquid.job_id)
+        response = aws_trs.get_transcription_job(TranscriptionJobName=self.liquid.job_id)
         if response["TranscriptionJob"]["TranscriptionJobStatus"] not in [
             "COMPLETED",
             "FAILED",
