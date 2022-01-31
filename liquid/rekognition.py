@@ -106,7 +106,7 @@ class VideoSubmitter:
     def _do_text_transcription(self):
         """Calls AWS Rekognition to create captions for the video."""
         video_uri = s3.get_object_url(self.video)
-        job_id = f"transcription-service-{self.liquid.id}"
+        job_id = f"transcription-service-{self.liquid.id}-0382734283"
         response = aws_trs.start_transcription_job(
             TranscriptionJobName=job_id,
             Media={"MediaFileUri": video_uri},
