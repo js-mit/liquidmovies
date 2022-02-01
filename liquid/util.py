@@ -16,6 +16,14 @@ def numpy_to_binary(arr: np.ndarray) -> BytesIO:
     return io_buf
 
 
+def time_into_milliseconds(time_string):
+    """Utility function to turn time string into milliseconds from H:M:S.f format."""
+    hours = int(time_string[:2])
+    mins = int(time_string[3:5])
+    seconds = float(time_string[6:])
+    return int(hours * 3600000 + mins * 60000 + seconds * 1000)
+
+
 def get_duration_and_frame_count(video_path: str) -> [int, int]:
     """Get duration and frame from video using opencv
 

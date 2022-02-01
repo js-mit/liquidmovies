@@ -4,7 +4,6 @@ import os
 import cv2
 import json
 import time
-import boto3
 import webvtt, string
 import datetime as dt
 
@@ -12,7 +11,7 @@ from . import s3, celery
 from .models import Liquid
 from .db import db_session
 from .rekognition import get_sqs_message, VideoDetector
-from .util import numpy_to_binary
+from .util import numpy_to_binary, time_into_milliseconds
 
 
 @celery.on_after_configure.connect
@@ -113,25 +112,13 @@ def _process_speech_search(data: string, liquid: Liquid) -> None:
     Returns None
     """
 
-    def time_into_milliseconds(time_string):
-        """Utility function to turn time string into milliseconds."""
-        hours = int(time_string[:2])
-        mins = int(time_string[3:5])
-        seconds = float(time_string[6:])
-        return int(hours * 3600000 + mins * 60000 + seconds * 1000)
-
     def make_caption_dict(vtt):
         """Makes a JSON dictionary from AWS transcribed vtt into a JSON dictionary"""
 
         if vtt[-4:] == ".vtt":
             captions = webvtt.read(vtt)
         else:
-            if vtt[-4:] == ".srt":
-                captions = webvtt.from_srt(vtt)
-            elif vtt[-4:] == ".sbv":
-                captions = webvtt.from_sbv(vtt)
-            else:
-                return "File format not accepted"
+            return "File not accepted"
 
         word_locations = dict()
 

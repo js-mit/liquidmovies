@@ -4,5 +4,3 @@ app = create_app()
 app.app_context().push()
 
 from liquid import celery
-
-print("George here")
