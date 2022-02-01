@@ -1,6 +1,8 @@
 from typing import Callable
-import boto3, random, string, json
+import boto3
+import json
 from flask import current_app as app
+from .util import random_char_sequence
 
 
 from . import s3
@@ -102,13 +104,8 @@ class VideoSubmitter:
 
     def _do_text_transcription(self):
         """Calls AWS Rekognition to create captions for the video."""
-
-        def random_char_sequence(y):
-            """Creates a random char sequence of length y for the job_id name randomization"""
-            return "".join(random.choice(string.ascii_letters) for x in range(y))
-
         video_uri = s3.get_object_url(self.video)
-        job_id = f"transcription-service-{self.liquid.id}-" + random_char_sequence(24)
+        job_id = f"transcription-service-{self.liquid.id}-{random_char_sequence(24)}"
         aws_trs.start_transcription_job(
             TranscriptionJobName=job_id,
             Media={"MediaFileUri": video_uri},

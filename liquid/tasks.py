@@ -4,7 +4,8 @@ import os
 import cv2
 import json
 import time
-import webvtt, string
+import webvtt
+import string
 import datetime as dt
 
 from . import s3, celery
@@ -112,13 +113,11 @@ def _process_speech_search(data: string, liquid: Liquid) -> None:
     Returns None
     """
 
-    def make_caption_dict(vtt):
+    def make_caption_dict(vtt: str) -> dict:
         """Makes a JSON dictionary from AWS transcribed vtt into a JSON dictionary"""
 
-        if vtt[-4:] == ".vtt":
-            captions = webvtt.read(vtt)
-        else:
-            return "File not accepted"
+        assert vtt[-4:] == ".vtt", "not vtt file"
+        captions = webvtt.read(vtt)
 
         word_locations = dict()
 
