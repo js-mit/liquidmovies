@@ -24,3 +24,6 @@ celerybeat-schedule
 
 # any .pem keys
 *.pem
+
+# mac things
+/.DS_Store

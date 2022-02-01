@@ -2,10 +2,14 @@ from typing import Callable
 import boto3
 import json
 from flask import current_app as app
+from .util import random_char_sequence
 
+
+from . import s3
 
 aws_sqs_queue_url = app.config["AWS_SQS_QUEUE_URL"]
 aws_rek = boto3.client("rekognition", region_name="us-east-1")
+aws_trs = boto3.client("transcribe", region_name="us-east-1")
 aws_sns = boto3.client("sns", region_name="us-east-1")
 aws_sqs = boto3.client("sqs", region_name="us-east-1")
 
@@ -22,17 +26,24 @@ def get_sqs_message(cb: Callable):
     )
     if "Messages" in sqs_response:
         for message in sqs_response["Messages"]:
-            # get rek_msg to get job_id
-            notification = json.loads(message["Body"])
-            rek_msg = json.loads(notification["Message"])
+            msg_body = json.loads(message["Body"])
 
-            # get results from rek using this cb
-            cb(rek_msg["JobId"])
+            # determine message type
+            job_id = None
+            if msg_body["Type"] == "Notification":
+                rek_msg = json.loads(msg_body["Message"])  # message from rekognition
+                job_id = rek_msg["JobId"]
+            elif msg_body["Type"] == "Default":
+                job_id = msg_body["JobId"]
+            else:
+                print("Invalid Message.")
+                return False
 
             # delete msg from queue
-            aws_sqs.delete_message(
-                QueueUrl=aws_sqs_queue_url, ReceiptHandle=message["ReceiptHandle"]
-            )
+            if cb(job_id):
+                aws_sqs.delete_message(
+                    QueueUrl=aws_sqs_queue_url, ReceiptHandle=message["ReceiptHandle"]
+                )
 
 
 class VideoSubmitter:
@@ -43,6 +54,7 @@ class VideoSubmitter:
     sns_topic_arn = ""
     sqs_queue_arn = ""
     treatment_id = ""
+    liquid = None
 
     def __init__(
         self,
@@ -52,6 +64,7 @@ class VideoSubmitter:
         bucket: str,
         video: str,
         treatment_id: int,
+        liquid: str,
     ):
         """
         Args:
@@ -61,6 +74,7 @@ class VideoSubmitter:
             bucket: the name of the s3 bucket where the video is located
             video: the path to the video in the s3 bucket
             treatment_id: the treatment id to determine which model to run
+            liquid: the liquid object to perform liquid operations
         """
         self.role_arn = role_arn
         self.sns_topic_arn = sns_topic_arn
@@ -68,6 +82,7 @@ class VideoSubmitter:
         self.bucket = bucket
         self.video = video
         self.treatment_id = treatment_id
+        self.liquid = liquid
 
         # subscribe the sqs to the sns topic (if not already)
         aws_sns.subscribe(
@@ -79,13 +94,38 @@ class VideoSubmitter:
         on treatment type.
         """
         if self.treatment_id == 1:
-            pass
+            self._do_text_transcription()
         elif self.treatment_id == 2:
             self._do_image_detection()
         elif self.treatment_id == 3:
             self._do_text_detection()
         else:
             print("invalid treatment id")
+
+    def _do_text_transcription(self):
+        """Calls AWS Rekognition to create captions for the video."""
+        video_uri = s3.get_object_url(self.video)
+        job_id = f"transcription-service-{self.liquid.id}-{random_char_sequence(24)}"
+        aws_trs.start_transcription_job(
+            TranscriptionJobName=job_id,
+            Media={"MediaFileUri": video_uri},
+            MediaFormat="mp4",
+            LanguageCode="en-US",
+            Subtitles={"Formats": ["vtt"]},
+            OutputBucketName=self.bucket,
+            OutputKey=s3.get_s3_liquid_path(
+                self.liquid.user_id, self.liquid.video_id, self.liquid.id
+            ),
+        )
+        self.job_id = job_id
+
+        # Adding a message to queue for get_sqs_message function to pickup
+        msg_body = {"Type": "Default", "JobId": job_id}
+        aws_sqs.send_message(
+            QueueUrl=aws_sqs_queue_url,
+            DelaySeconds=10,
+            MessageBody=json.dumps(msg_body),
+        )
 
     def _do_image_detection(self):
         """Calls AWS Rekognition label detection model to score each frame of
@@ -121,7 +161,7 @@ class VideoSubmitter:
 class VideoDetector:
     job_id = ""
     treatment_id = None
-    labels = []
+    data = []
     duration = 0
 
     def __init__(self, job_id: str, treatment_id: int):
@@ -134,9 +174,9 @@ class VideoDetector:
         self.treatment_id = treatment_id
 
     def get_results(self):
-        """ Generic function to get results of model based on treatment id. """
+        """Generic function to get results of model based on treatment id."""
         if self.treatment_id == 1:
-            pass
+            return self._get_transcription_results()
         elif self.treatment_id == 2:
             return self._get_image_detection_results()
         elif self.treatment_id == 3:
@@ -145,10 +185,25 @@ class VideoDetector:
             print("Invalid treatment")
             return None
 
+    def _get_transcription_results(self):
+        """Get text transcription results from aws."""
+
+        response = aws_trs.get_transcription_job(TranscriptionJobName=self.job_id)
+        if response["TranscriptionJob"]["TranscriptionJobStatus"] not in [
+            "COMPLETED",
+            "FAILED",
+        ]:
+            return False
+
+        # Returns the URL of the .vtt caption file
+        self.data = response["TranscriptionJob"]["Subtitles"]["SubtitleFileUris"][0]
+        return True
+
     def _get_image_detection_results(self):
-        """ Get image detection result from aws. """
+        """Get image detection result from aws."""
         pagination_token = ""
         finished = False
+        self.data = []
 
         while finished == False:
 
@@ -159,17 +214,20 @@ class VideoDetector:
                 SortBy="TIMESTAMP",
             )
 
-            self.labels.extend(response["Labels"])
+            self.data.extend(response["Labels"])
 
             if "NextToken" in response:
                 pagination_token = response["NextToken"]
             else:
                 finished = True
 
+        return True
+
     def _get_text_detection_results(self):
-        """ Get text detection result from aws. """
+        """Get text detection result from aws."""
         pagination_token = ""
         finished = False
+        self.data = []
 
         while finished == False:
 
@@ -179,9 +237,11 @@ class VideoDetector:
                 NextToken=pagination_token,
             )
 
-            self.labels.extend(response["TextDetections"])
+            self.data.extend(response["TextDetections"])
 
             if "NextToken" in response:
                 pagination_token = response["NextToken"]
             else:
                 finished = True
+
+        return True

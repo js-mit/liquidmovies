@@ -73,7 +73,7 @@ def get_liquid_job(job_id: str):
 @app.route("/liquid/upload", methods=["GET", "POST"])
 @login_required
 def upload_liquid():
-    """Uploads video + kicks of video processing
+    """Uploads video + kicks off video processing
 
     POST:
         1. Upload video to aws s3 and get video s3 url
@@ -147,6 +147,7 @@ def upload_liquid():
             bucket=app.config["AWS_S3_BUCKET"],
             video=f"{s3_path}/video.mp4",
             treatment_id=form.treatment_id.data,
+            liquid=liquid,
         )
         submitter.do_detection()
 

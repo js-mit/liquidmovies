@@ -14,7 +14,7 @@ celery = Celery(
 
 
 def create_app(test_config=None):
-    """ Main application that uses the Flask factory pattern. """
+    """Main application that uses the Flask factory pattern."""
 
     # create and configure the app
     app = Flask(
