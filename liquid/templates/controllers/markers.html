@@ -1,14 +1,18 @@
 <form id="video-search">
-    <input type="text" placeholder="search"/>
+  <input type="text" placeholder="search" />
 </form>
 
+<div id="topwords-container">
+  <div>Topwords</div>
+  <span id="topwords-list"></span>
+</div>
+
 <div id="progress-container">
-    <progress id="progress" value="0" min="0">
-        <span id="progress-bar"></span>
-    </progress>
+  <progress id="progress" value="0" min="0">
+    <span id="progress-bar"></span>
+  </progress>
 </div>
 
 {% include 'snippets/base_controller.html' %}
 
 <div id="search-images"></div>
-

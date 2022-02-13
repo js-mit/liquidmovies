@@ -1,38 +1,59 @@
-{% extends 'base.html' %} {% block js %}
-<script>
-  const _data = {{ data | safe }};
-  const _duration = {{ liquid.video.duration | safe }};
-  const _treatment = {{ liquid.treatment_id | safe }};
-</script>
-<script src="{{ url_for('static', filename='js/util.js') }}"></script>
-<script src="{{ url_for('static', filename='js/player.js') }}"></script>
+{% extends 'base.html' %}
 
-{% if liquid.treatment.controller_id == 1 %}
-<script src="{{ url_for('static', filename='js/controllers/segments.js') }}"></script>
-{% elif liquid.treatment.controller_id == 2 %}
-<script src="{{ url_for('static', filename='js/controllers/heatgraph.js') }}"></script>
-{% elif liquid.treatment.controller_id == 3 %}
-<script src="{{ url_for('static', filename='js/controllers/markers.js') }}"></script>
-{% endif %} {% endblock %} {% block css %}
-<link
-  rel="stylesheet"
-  href="{{ url_for('static', filename='css/liquid.css') }}"
-/>
-{% endblock %} {% block content %} {% include 'snippets/video.html' %} {% if
-liquid.treatment.controller_id == 1 %} {% include 'controllers/segments.html' %}
-{% elif liquid.treatment.controller_id == 2 %} {% include
-'controllers/heatgraph.html' %} {% elif liquid.treatment.controller_id == 3 %}
-{% include 'controllers/markers.html' %} {% endif %}
+{% block js %}
+    <script>
+        const _data = {{ data | safe }};
+        const _duration = {{ liquid.video.duration | safe }};
+        const _treatment = {{ liquid.treatment_id | safe }};
+        const _topwords = {{ topwords | safe }};
+    </script>
+    <script src="{{ url_for('static', filename='js/util.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/player.js') }}"></script>
 
-<hr />
+    {% if liquid.treatment.controller_id == 1 %}
+    <script src="{{ url_for('static', filename='js/controllers/segments.js') }}"></script>
+    {% elif liquid.treatment.controller_id == 2 %}
+    <script src="{{ url_for('static', filename='js/controllers/heatgraph.js') }}"></script>
+    {% elif liquid.treatment.controller_id == 3 %}
+    <script src="{{ url_for('static', filename='js/controllers/markers.js') }}"></script>
+    {% endif %}
 
-<h1>{% block title %} {{ liquid.video.name }} {% endblock %}</h1>
+{% endblock %}
 
-<hr />
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/liquid.css') }}">
+{% endblock %}
 
-<div class="vid-desc">desc: {{ liquid.video.desc }}</div>
-<div class="vid-method">treatment: {{ liquid.treatment }}</div>
-<div class="vid-liquid">data: <a href="{{ liquid.url }}">URL</a></div>
-<div>topwords:{{topwords}}</div>
+{% block content %}
+
+    {% include 'snippets/video.html' %}
+
+    {% if liquid.treatment.controller_id == 1 %}
+    {% include 'controllers/segments.html' %}
+    {% elif liquid.treatment.controller_id == 2 %}
+    {% include 'controllers/heatgraph.html' %}
+    {% elif liquid.treatment.controller_id == 3 %}
+    {% include 'controllers/markers.html' %}
+    {% endif %}
+
+    <hr>
+
+    <h1>{% block title %} {{ liquid.video.name }} {% endblock %}</h1>
+
+    <hr>
+
+    <div class="vid-desc">
+        desc: {{ liquid.video.desc }}
+    </div>
+    <div class="vid-method">
+        treatment: {{ liquid.treatment }}
+    </div>
+    <div class="vid-liquid">
+        data: <a href="{{ liquid.url }}">URL</a>
+    </div>
+    <div>
+      topwords: {{topwords}}
+    </div>
+
 
 {% endblock %}
