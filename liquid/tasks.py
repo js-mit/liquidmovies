@@ -224,7 +224,9 @@ def _process_image_search(data: Union[Mapping, Iterable], liquid: Liquid) -> boo
 
     key = f"{path}/data.json"
     success = s3.put_object(
-        obj=json.dumps(data), key=key, content_type="application/json",
+        obj=json.dumps(data),
+        key=key,
+        content_type="application/json",
     )
     if not success:
         print("Error uploading json file.")
@@ -259,7 +261,9 @@ def _process_text_search(data: Union[Mapping, Iterable], liquid: Liquid) -> bool
     path = s3.get_s3_liquid_path(liquid.user_id, liquid.video.id, liquid.id)
     key = f"{path}/data.json"
     success = s3.put_object(
-        obj=json.dumps(data), key=key, content_type="application/json",
+        obj=json.dumps(data),
+        key=key,
+        content_type="application/json",
     )
     if not success:
         print("Error uploading json file.")

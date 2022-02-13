@@ -35,8 +35,6 @@ def liquid(liquid_id: int):
 
     topnum = 10
     topwords = gettopwords(data, topnum)
-    print("testtest")
-    print(topwords)
 
     return render_template("liquid.html", liquid=liquid, data=data, topwords=topwords)
 
@@ -105,7 +103,9 @@ def upload_liquid():
 
         # upload video
         success = s3.upload_fileobj(
-            obj=form.video.data, key=f"{s3_path}/video.mp4", content_type="video/mp4",
+            obj=form.video.data,
+            key=f"{s3_path}/video.mp4",
+            content_type="video/mp4",
         )
         if not success:
             flash("Upload Video failed.")

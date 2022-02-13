@@ -41,7 +41,9 @@ db_session.add_all([c1, c2, c3])
 Create Treatments
 """
 t1 = Treatment(
-    name="text-search", desc="ctrl-f with text using speech-to-text", controller_id=3,
+    name="text-search",
+    desc="ctrl-f with text using speech-to-text",
+    controller_id=3,
 )
 t2 = Treatment(
     name="image-detection",

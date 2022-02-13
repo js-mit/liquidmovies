@@ -79,7 +79,6 @@ $(document).ready(function () {
     for (var i = 0; i < _topwords.length; i++) {
       var word = $(`<span id=${i} class="each-topword">${_topwords[i]}</span>`);
       $("#topwords-list").append(word);
-      console.log(_topwords[i]);
       word.click(function () {
         var id = $(this).attr("id");
         // console.log("word clicked", _topwords[id]);

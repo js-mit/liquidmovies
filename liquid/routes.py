@@ -13,7 +13,8 @@ def index():
         print(current_user.id)
 
     liquids = Liquid.query.filter(
-        (Liquid.active == True), (Liquid.private == False),
+        (Liquid.active == True),
+        (Liquid.private == False),
     ).all()
     return render_template("index.html", liquids=liquids)
 
@@ -22,7 +23,8 @@ def index():
 @login_required
 def profile():
     liquids = Liquid.query.filter(
-        (Liquid.active == True), (Liquid.user_id == current_user.id),
+        (Liquid.active == True),
+        (Liquid.user_id == current_user.id),
     ).all()
 
     return render_template("profile.html", liquids=liquids)
