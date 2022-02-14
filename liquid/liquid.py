@@ -3,14 +3,13 @@ from flask import render_template, redirect, url_for, abort, flash
 from flask import current_app as app
 from flask_login import current_user, login_required
 
-from . import s3
+from .aws import s3, video
 from .db import db_session
 from .models import Liquid, Video, Treatment
-from .forms import UploadVideoForm
-from .rekognition import VideoDetector, VideoSubmitter
 from .treatment import render_data
 from .tasks import process_job_data
 from .util import get_duration_and_frame_count
+from .ui.forms import UploadVideoForm
 
 
 @app.route("/liquid/<int:liquid_id>")
@@ -62,7 +61,7 @@ def get_liquid_job(job_id: str):
         job_id: job id for video processing task
     """
     # get results from rekognition
-    detector = VideoDetector(job_id)
+    detector = video.Detector(job_id)
     if not detector.get_results():
         process_job_data.apply_async(args=[detector.labels, job_id])
         flash(f"Job <{job_id}> results are being processed in the background...")
@@ -140,7 +139,7 @@ def upload_liquid():
         db_session.commit()
 
         # submit video to aws rekognition
-        submitter = VideoSubmitter(
+        submitter = video.Submitter(
             role_arn=app.config["AWS_REK_SERVICE_ROLE_ARN"],
             sns_topic_arn=app.config["AWS_SNS_TOPIC_ARN"],
             sqs_queue_arn=app.config["AWS_SQS_QUEUE_ARN"],

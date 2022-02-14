@@ -47,10 +47,9 @@ def create_app(test_config=None):
         # Import parts of our application
         from . import routes
         from . import models
-        from . import jinja_filters
         from . import auth
-        from . import s3
-        from . import rekognition
         from . import liquid
+        from .aws import s3, sqs, video
+        from .ui import jinja_filters, forms
 
         return app

@@ -1,51 +1,16 @@
-from typing import Callable
 import boto3
 import json
 from flask import current_app as app
 
-from .util import random_char_sequence
-from . import s3
+from ..util import random_char_sequence
+from . import s3, sqs
 
-aws_sqs_queue_url = app.config["AWS_SQS_QUEUE_URL"]
 aws_rek = boto3.client("rekognition", region_name="us-east-1")
 aws_trs = boto3.client("transcribe", region_name="us-east-1")
 aws_sns = boto3.client("sns", region_name="us-east-1")
-aws_sqs = boto3.client("sqs", region_name="us-east-1")
 
 
-def get_sqs_message(cb: Callable):
-    """Poll for msgs from AWS SQS queue. Messages will appear in the queue when
-    video processing tasks are completed.
-
-    Args:
-        cb: the function to call once message is retreived from the queue
-    """
-    sqs_response = aws_sqs.receive_message(
-        QueueUrl=aws_sqs_queue_url, MessageAttributeNames=["ALL"], MaxNumberOfMessages=1
-    )
-    if "Messages" in sqs_response:
-        for message in sqs_response["Messages"]:
-            msg_body = json.loads(message["Body"])
-
-            # determine message type
-            job_id = None
-            if msg_body["Type"] == "Notification":
-                rek_msg = json.loads(msg_body["Message"])  # message from rekognition
-                job_id = rek_msg["JobId"]
-            elif msg_body["Type"] == "Default":
-                job_id = msg_body["JobId"]
-            else:
-                print("Invalid Message.")
-                return False
-
-            # delete msg from queue
-            if cb(job_id):
-                aws_sqs.delete_message(
-                    QueueUrl=aws_sqs_queue_url, ReceiptHandle=message["ReceiptHandle"]
-                )
-
-
-class VideoSubmitter:
+class Submitter:
     bucket = ""
     video = ""
     job_id = ""
@@ -117,14 +82,7 @@ class VideoSubmitter:
             ),
         )
         self.job_id = job_id
-
-        # Adding a message to queue for get_sqs_message function to pickup
-        msg_body = {"Type": "Default", "JobId": job_id}
-        aws_sqs.send_message(
-            QueueUrl=aws_sqs_queue_url,
-            DelaySeconds=10,
-            MessageBody=json.dumps(msg_body),
-        )
+        sqs.put_message({"Type": "Default", "JobId": job_id})
 
     def _do_image_detection(self):
         """Calls AWS Rekognition label detection model to score each frame of
@@ -157,7 +115,7 @@ class VideoSubmitter:
         self.job_id = response["JobId"]
 
 
-class VideoDetector:
+class Detector:
     job_id = ""
     treatment_id = None
     data = []

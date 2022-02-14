@@ -8,10 +8,10 @@ import webvtt
 import string
 import datetime as dt
 
-from . import s3, celery
+from . import celery
+from .aws import s3, sqs, video
 from .models import Liquid
 from .db import db_session
-from .rekognition import get_sqs_message, VideoDetector
 from .util import numpy_to_binary, time_into_milliseconds
 
 
@@ -43,7 +43,7 @@ def check_sqs() -> str:
     """
 
     def get_results(job_id: str) -> bool:
-        """Get results from VideoDetector
+        """Get results from Detector
 
         Args:
             job_id: get results from this job_id
@@ -51,7 +51,7 @@ def check_sqs() -> str:
             True is results were found in detector, False otherwise
         """
         liquid = Liquid.query.filter(Liquid.job_id == job_id).first()
-        detector = VideoDetector(job_id, liquid.treatment_id)
+        detector = video.Detector(job_id, liquid.treatment_id)
         if detector.get_results():
             process_job_data.apply_async(args=[detector.data, job_id])
             return True
@@ -59,7 +59,7 @@ def check_sqs() -> str:
             return False
 
     # check sqs for rekognition results
-    get_sqs_message(get_results)
+    sqs.get_message(get_results)
 
     return "done"
 
