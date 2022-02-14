@@ -2,9 +2,8 @@ from typing import Callable
 import boto3
 import json
 from flask import current_app as app
+
 from .util import random_char_sequence
-
-
 from . import s3
 
 aws_sqs_queue_url = app.config["AWS_SQS_QUEUE_URL"]
