@@ -9,7 +9,7 @@ aws_sqs = boto3.client("sqs", region_name="us-east-1")
 
 
 def put_message(msg_body: Dict):
-    """ Put message in sqs queue.
+    """Put message in sqs queue.
 
     Args:
         msg_body: dictionary, must contain keys: "Type" and "JobId"
@@ -51,6 +51,3 @@ def get_message(cb: Callable):
                 aws_sqs.delete_message(
                     QueueUrl=aws_sqs_queue_url, ReceiptHandle=message["ReceiptHandle"]
                 )
-
-
-
