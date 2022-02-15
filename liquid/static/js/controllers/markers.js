@@ -101,7 +101,17 @@ $(document).ready(function () {
         var markers = [];
         var frameUrls = [];
         if (string) {
-            if (_treatment == 2) {
+            if (_treatment == 1) {
+                // set up markers
+                for (const [key, val] of Object.entries(_data)) {
+                    if (key.includes(string.toLowerCase())) {
+                        for (var i = 0; i < val.length; i++) {
+                            markers.push(parseInt(val[i] / 1000));
+                        }
+                    }
+                }
+                markers.forEach((i) => addMarker(video, i));
+            } else if (_treatment == 2) {
                 // set up markers
                 for (var i = 0; i < _data.length; i++) {
                     var el = _data[i];
@@ -140,7 +150,7 @@ $(document).ready(function () {
                     if (confidence >= 97.5) {
                         if (label.includes(string.toLowerCase())) {
                             markers.push(parseInt(el["Timestamp"]) / 1000);
-                            frameUrls.push(el["FrameURL"]);
+                            // frameUrls.push(el["FrameURL"])
                         }
                     }
                 }

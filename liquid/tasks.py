@@ -8,10 +8,10 @@ import webvtt
 import string
 import datetime as dt
 
-from . import s3, celery
+from . import celery
+from .aws import s3, sqs, video
 from .models import Liquid
 from .db import db_session
-from .rekognition import get_sqs_message, VideoDetector
 from .util import numpy_to_binary, time_into_milliseconds
 
 
@@ -43,7 +43,7 @@ def check_sqs() -> str:
     """
 
     def get_results(job_id: str) -> bool:
-        """Get results from VideoDetector
+        """Get results from Detector
 
         Args:
             job_id: get results from this job_id
@@ -51,7 +51,7 @@ def check_sqs() -> str:
             True is results were found in detector, False otherwise
         """
         liquid = Liquid.query.filter(Liquid.job_id == job_id).first()
-        detector = VideoDetector(job_id, liquid.treatment_id)
+        detector = video.Detector(job_id, liquid.treatment_id)
         if detector.get_results():
             process_job_data.apply_async(args=[detector.data, job_id])
             return True
@@ -59,7 +59,7 @@ def check_sqs() -> str:
             return False
 
     # check sqs for rekognition results
-    get_sqs_message(get_results)
+    sqs.get_message(get_results)
 
     return "done"
 
@@ -105,50 +105,51 @@ def _process_speech_search(data: string, liquid: Liquid) -> None:
     2. convert vtt to json formation
     3. upload json file to <liquid_path>, which we get using s3.get_s3_liquid_path
 
-    # TODO (look at `_process_text_search` as example)
-
     Args:
         data: location of vtt file
         liquid: liquid object
     Returns None
     """
 
-    def make_caption_dict(vtt: str) -> dict:
-        """Makes a JSON dictionary from AWS transcribed vtt into a JSON dictionary"""
-
-        assert vtt[-4:] == ".vtt", "not vtt file"
-        captions = webvtt.read(vtt)
-
-        word_locations = dict()
-
-        for line in captions:
-            total_time = dt.datetime.strptime(line.start, "%H:%M:%S.%f")
-            text = (
-                line.text.translate(str.maketrans("", "", string.punctuation))
-                .lower()
-                .split()
-            )
-            time_interval = dt.datetime.strptime(
-                line.end, "%H:%M:%S.%f"
-            ) - dt.datetime.strptime(line.start, "%H:%M:%S.%f")
-            for i in range(len(text)):
-                curr_time = (total_time + time_interval * i / len(text)).strftime(
-                    "%H:%M:%S.%f"
-                )
-                word_locations.setdefault(text[i], [])
-                word_locations[text[i]].append(time_into_milliseconds(curr_time))
-
-        return word_locations
-
-    # temporarily download vtt, remove after `make_caption_dict` is called
+    # temporarily download vtt, remove after caption_dictionary is created
     tmp_file = s3.download_file_by_url(data, "/tmp/tmp_vtt.vtt")
-    capt_dict = make_caption_dict(tmp_file)
+
+    # converts vtt file to dictionary format
+    """
+    ex.
+    {
+        "rich": [1440],
+        "thank": [1746],
+        "you": [2053, 2764, 97706, 99240, 114792, 117398, 120580],
+    }
+    """
+    captions = webvtt.read(tmp_file)
+    captions_dict = dict()
+    for line in captions:
+        total_time = dt.datetime.strptime(line.start, "%H:%M:%S.%f")
+        text = (
+            line.text.translate(str.maketrans("", "", string.punctuation))
+            .lower()
+            .split()
+        )
+        time_interval = dt.datetime.strptime(
+            line.end, "%H:%M:%S.%f"
+        ) - dt.datetime.strptime(line.start, "%H:%M:%S.%f")
+        for i in range(len(text)):
+            curr_time = (total_time + time_interval * i / len(text)).strftime(
+                "%H:%M:%S.%f"
+            )
+            captions_dict.setdefault(text[i], [])
+            captions_dict[text[i]].append(time_into_milliseconds(curr_time))
+
+    # remove tmp vtt file
     os.remove(tmp_file)
 
+    # save captions_dict to s3
     path = s3.get_s3_liquid_path(liquid.user_id, liquid.video.id, liquid.id)
     key = f"{path}/captions.json"
     success = s3.put_object(
-        obj=json.dumps(capt_dict),
+        obj=json.dumps(captions_dict),
         key=key,
         content_type="application/json",
     )
