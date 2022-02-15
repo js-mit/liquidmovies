@@ -1,23 +1,20 @@
-{% extends 'base.html' %} 
+{% extends 'base.html' %}
 
-{% block title %}Home{% endblock %} 
+{% block title %}Home{% endblock %}
 
-{% block content%}
+{% block content %}
 <h2>Videos</h2>
 
-{% for liquid in liquids %} 
+{% for liquid in liquids %}
 {% if liquid.processing == False %}
 <a href="{{ url_for('liquid', liquid_id=liquid.id) }}">
-  <img style="width: 300px; height: auto" src="{{ liquid.video.poster_url }}" />
-  <div>
-    Liquid: {{ liquid.id }} | Video: {{ liquid.video }} | Treatment: {{
-    liquid.treatment }} | Desc: {{ liquid.video.desc }} | User: {{
-    liquid.user_id }}
-  </div>
-  <div></div>
+    <img style="width:300px;height:auto" src="{{ liquid.video.poster_url }}">
+    <div>
+        Liquid: {{ liquid.id }} | Video: {{ liquid.video }} | Treatment: {{ liquid.treatment }} | Desc: {{ liquid.video.desc }} | User: {{ liquid.user_id }}
+    </div>
 </a>
-<hr />
-{% endif %} 
-{% endfor %} 
+<hr>
+{% endif %}
+{% endfor %}
 
 {% endblock %}
