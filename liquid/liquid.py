@@ -9,7 +9,7 @@ from .models import Liquid, Video, Treatment
 from .treatment import render_data
 from .tasks import process_job_data
 from .util import get_duration_and_frame_count
-from .topwords import gettopwords
+from .topwords import get_topwords
 from .ui.forms import UploadVideoForm
 
 
@@ -33,7 +33,7 @@ def liquid(liquid_id: int):
     data = render_data(data, liquid.treatment_id)
 
     topnum = 10
-    topwords = gettopwords(data, topnum)
+    topwords = get_topwords(data, topnum)
 
     return render_template("liquid.html", liquid=liquid, data=data, topwords=topwords)
 

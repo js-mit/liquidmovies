@@ -1,37 +1,25 @@
-def gettopwords(data, topnum):
-
-    key = "Name"
-
-    # find occurence of each key
-    def findOcc(arr, key):
-        arr2 = []
-        for object in arr:
-            name = object["Label"][key]
-            nameexist = False
-            for obj in arr2:
-                if obj[key] == name:
-                    nameexist = True
-                    break
-            if nameexist:
-                for obj in arr2:
-                    if obj[key] == name:
-                        obj["occurrence"] += 1
+def get_topwords(data, topnum):
+    topwords_lookup = {}
+    confidence_threshold = 0.8
+    for obj in data: 
+        if obj['Label']['Confidence']>confidence_threshold:
+            name = obj['Label']['Name']
+            if name in topwords_lookup:
+                topwords_lookup[name] += 1
             else:
-                newobj = {}
-                newobj[key] = name
-                newobj["occurrence"] = 1
-                arr2.append(newobj)
-        return arr2
+                topwords_lookup[name] = 1
 
-    def sortOcc(obj):
-        return obj["occurrence"]
-
-    # sort the array
-    list = findOcc(data, key)
-    list.sort(key=sortOcc, reverse=True)
-
-    toplist = []
+            for parent in obj['Label']['Parents']:
+                name = parent['Name']
+                if name in topwords_lookup:
+                    topwords_lookup[name] += 1
+                else:
+                    topwords_lookup[name] = 1
+    
+    topwords_lookup = sorted(topwords_lookup.items(), key=lambda item: item[1], reverse=True)
+    
+    topwords_list = []
     for i in range(topnum):
-        toplist.append(list[i][key])
+        topwords_list.append(topwords_lookup[i][0])
 
-    return toplist
+    return topwords_list
