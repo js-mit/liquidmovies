@@ -9,7 +9,7 @@ import string
 import datetime as dt
 
 from . import celery
-from .aws import s3, sqs, video
+from .aws import s3, sqs, inference
 from .models import Liquid
 from .db import db_session
 from .util import numpy_to_binary, time_into_milliseconds
@@ -51,7 +51,7 @@ def check_sqs() -> str:
             True is results were found in detector, False otherwise
         """
         liquid = Liquid.query.filter(Liquid.job_id == job_id).first()
-        detector = video.Detector(job_id, liquid.treatment_id)
+        detector = inference.Detector(job_id, liquid.treatment_id)
         if detector.get_results():
             process_job_data.apply_async(args=[detector.data, job_id])
             return True
@@ -93,12 +93,33 @@ def process_job_data(data: Any, job_id: str) -> bool:
         success = _process_image_search(data, liquid)
     elif liquid.treatment_id == 3:
         success = _process_text_search(data, liquid)
+    elif liquid.treatment_id == 4:
+        success = _process_diarization(data, liquid)
     else:
         print("Error - treatment id not found")
     return success
 
 
-def _process_speech_search(data: string, liquid: Liquid) -> None:
+def _process_diarization(data: str, liquid: Liquid) -> None:
+    """ Maybe just a passthrough!
+
+    1. get transcription data as json from s3 bucket
+    2. process json to get speaker info (maybe nothing to do here)
+
+    Args:
+        data: location of the json results for transcription
+        liquid: liquid object
+    Returns None
+    """
+    s3.set_public(s3.get_key_from_url(data))
+    liquid.processing = False
+    liquid.url = data
+    db_session.add(liquid)
+    db_session.commit()
+    return True
+
+
+def _process_speech_search(data: str, liquid: Liquid) -> None:
     """Process transcription output by converting to json format
 
     1. get transcription vtt s3 bucket location
@@ -110,7 +131,6 @@ def _process_speech_search(data: string, liquid: Liquid) -> None:
         liquid: liquid object
     Returns None
     """
-
     # temporarily download vtt, remove after caption_dictionary is created
     tmp_file = s3.download_file_by_url(data, "/tmp/tmp_vtt.vtt")
 
@@ -147,7 +167,7 @@ def _process_speech_search(data: string, liquid: Liquid) -> None:
 
     # save captions_dict to s3
     path = s3.get_s3_liquid_path(liquid.user_id, liquid.video.id, liquid.id)
-    key = f"{path}/captions.json"
+    key = f"{path}/speech_detect.json"
     success = s3.put_object(
         obj=json.dumps(captions_dict),
         key=key,
