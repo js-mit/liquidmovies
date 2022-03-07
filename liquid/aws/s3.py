@@ -19,6 +19,13 @@ s3_client = boto3.client(
 s3_bucket = app.config["AWS_S3_BUCKET"]
 
 
+def set_public(key: str) -> None:
+    """ Set object in bucket to public-read. """
+    s3_client.put_object_acl(
+        ACL="public-read", Bucket=s3_bucket, Key=key
+    )
+
+
 def get_s3_video_path(user_id: int, video_id: int) -> str:
     """Gets s3 video path
     path structure: users/<user_id>/videos/<video_id>
@@ -116,7 +123,7 @@ def download_file_by_url(url: str, file_name: str) -> str:
     Returns:
         The location of the file.
     """
-    key = _get_key_from_url(url)
+    key = get_key_from_url(url)
     s3_client.download_file(s3_bucket, key, file_name)
     return file_name
 
@@ -152,11 +159,11 @@ def download_liquid_by_url(url: str) -> Union[Mapping, Iterable]:
     Returns:
         liquid data as object
     """
-    key = _get_key_from_url(url)
+    key = get_key_from_url(url)
     return _download_liquid(key)
 
 
-def _get_key_from_url(url: str) -> str:
+def get_key_from_url(url: str) -> str:
     """Get key from s3 url type
 
     s3 url can be in two formats:

@@ -32,7 +32,7 @@ Create Controllers
 TODO - should this be here or in the application layer?
 """
 c1 = Controller(name="segments")
-c2 = Controller(name="diarization")
+c2 = Controller(name="heatgraph")
 c3 = Controller(name="markers")
 db_session.add_all([c1, c2, c3])
 
@@ -41,21 +41,26 @@ db_session.add_all([c1, c2, c3])
 Create Treatments
 """
 t1 = Treatment(
-    name="text-search",
+    name="speech detection",
     desc="ctrl-f with text using speech-to-text",
     controller_id=3,
 )
 t2 = Treatment(
-    name="image-detection",
+    name="image detection",
     desc="ctrl-f on images using default rekognition label-detection api",
     controller_id=3,
 )
 t3 = Treatment(
-    name="text-detection",
+    name="text detection",
     desc="ctrl-f on text in video using rekognition text-detection api",
     controller_id=3,
 )
-db_session.add_all([t1, t2, t3])
+t4 = Treatment(
+    name="diarization",
+    desc="detect different speachers in video using aws transcription api",
+    controller_id=1,
+)
+db_session.add_all([t1, t2, t3, t4])
 
 
 """

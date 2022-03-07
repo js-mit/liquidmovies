@@ -49,6 +49,8 @@ progress::-webkit-progress-value {
     position: absolute;
     margin-top: 8px;
 }
+
+/* Markers */
 #progress-container .marker {
     position: absolute;
     width: 2px;
@@ -99,4 +101,20 @@ progress::-webkit-progress-value {
     width: 100px;
     border: #000 1px solid;
     text-align: center;
+}
+/* Segments */
+.speaker-btn {
+    margin-right: 4px;
+    border: 1px solid black;
+}
+#segments-container {
+    margin-top: 16px;
+    height: 6px;
+    position: relative;
+    background-color: #eee;
+}
+.segment {
+    position: absolute;
+    background-color: black;
+    height: 100%;
 }
