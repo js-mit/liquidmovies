@@ -49,7 +49,7 @@ def create_app(test_config=None):
         from . import models
         from . import auth
         from . import liquid
-        from .aws import s3, sqs, video
+        from .aws import s3, sqs, inference
         from .ui import jinja_filters, forms
 
         return app

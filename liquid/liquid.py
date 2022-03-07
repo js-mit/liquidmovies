@@ -3,7 +3,7 @@ from flask import render_template, redirect, url_for, abort, flash
 from flask import current_app as app
 from flask_login import current_user, login_required
 
-from .aws import s3, video
+from .aws import s3, inference
 from .db import db_session
 from .models import Liquid, Video, Treatment
 from .treatment import render_data
@@ -139,7 +139,7 @@ def upload_liquid():
         db_session.commit()
 
         # submit video to aws rekognition
-        submitter = video.Submitter(
+        submitter = inference.Submitter(
             role_arn=app.config["AWS_REK_SERVICE_ROLE_ARN"],
             sns_topic_arn=app.config["AWS_SNS_TOPIC_ARN"],
             sqs_queue_arn=app.config["AWS_SQS_QUEUE_ARN"],

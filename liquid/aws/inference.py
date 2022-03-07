@@ -58,18 +58,23 @@ class Submitter:
         on treatment type.
         """
         if self.treatment_id == 1:
-            self._do_text_transcription()
+            self._do_transcribe()
         elif self.treatment_id == 2:
             self._do_image_detection()
         elif self.treatment_id == 3:
             self._do_text_detection()
+        elif self.treatment_id == 4:
+            self._do_transcribe()
         else:
             print("invalid treatment id")
 
-    def _do_text_transcription(self):
+    def _do_transcribe(self):
         """Calls AWS Rekognition to create captions for the video."""
         video_uri = s3.get_object_url(self.video)
-        job_id = f"transcription-service-{self.liquid.id}-{random_char_sequence(24)}"
+        job_id = f"{self.liquid.id}-{random_char_sequence(24)}"
+        output_path = s3.get_s3_liquid_path(
+            self.liquid.user_id, self.liquid.video_id, self.liquid.id
+        )
         aws_trs.start_transcription_job(
             TranscriptionJobName=job_id,
             Media={"MediaFileUri": video_uri},
@@ -77,9 +82,12 @@ class Submitter:
             LanguageCode="en-US",
             Subtitles={"Formats": ["vtt"]},
             OutputBucketName=self.bucket,
-            OutputKey=s3.get_s3_liquid_path(
-                self.liquid.user_id, self.liquid.video_id, self.liquid.id
-            ),
+            OutputKey=f"{output_path}/data.json",
+            Settings={
+                "ShowSpeakerLabels": True,
+                "MaxSpeakerLabels": 10,
+                "ShowAlternatives": False,
+            }
         )
         self.job_id = job_id
         sqs.put_message({"Type": "Default", "JobId": job_id})
@@ -133,17 +141,19 @@ class Detector:
     def get_results(self):
         """Generic function to get results of model based on treatment id."""
         if self.treatment_id == 1:
-            return self._get_transcription_results()
+            return self._get_speech_detection_results()
         elif self.treatment_id == 2:
             return self._get_image_detection_results()
         elif self.treatment_id == 3:
             return self._get_text_detection_results()
+        elif self.treatment_id == 4:
+            return self._get_diarization_results()
         else:
             print("Invalid treatment")
             return None
 
-    def _get_transcription_results(self):
-        """Get text transcription results from aws."""
+    def _get_speech_detection_results(self):
+        """Get text transcription results from aws, saves location of vtt."""
 
         response = aws_trs.get_transcription_job(TranscriptionJobName=self.job_id)
         if response["TranscriptionJob"]["TranscriptionJobStatus"] not in [
@@ -154,6 +164,20 @@ class Detector:
 
         # Returns the URL of the .vtt caption file
         self.data = response["TranscriptionJob"]["Subtitles"]["SubtitleFileUris"][0]
+        return True
+
+    def _get_diarization_results(self):
+        """Get text transcription results from aws, saves location of json."""
+
+        response = aws_trs.get_transcription_job(TranscriptionJobName=self.job_id)
+        if response["TranscriptionJob"]["TranscriptionJobStatus"] not in [
+            "COMPLETED",
+            "FAILED",
+        ]:
+            return False
+
+        # Returns the URL of the json results
+        self.data = response["TranscriptionJob"]["Transcript"]["TranscriptFileUri"]
         return True
 
     def _get_image_detection_results(self):
