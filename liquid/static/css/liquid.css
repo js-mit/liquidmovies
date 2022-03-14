@@ -27,7 +27,7 @@
     width: 100%;
 }
 progress {
-    border-radius: 0px; 
+    border-radius: 0px;
     width: 80%;
     height: 5px;
     cursor: pointer;
@@ -72,10 +72,10 @@ progress::-webkit-progress-value {
     position: absolute;
     width: 100%;
     height: 100%;
-    background-color: rgba(0,0,0,0.5);
+    background-color: rgba(0, 0, 0, 0.5);
     display: None;
 }
-#search-images .thumbnail-overlay .thumbnail-seconds{
+#search-images .thumbnail-overlay .thumbnail-seconds {
     position: absolute;
     left: 50%;
     top: 50%;
@@ -87,6 +87,21 @@ progress::-webkit-progress-value {
     height: 100px;
 }
 
+#topwords-container {
+    position: relative;
+    height: 60px;
+}
+
+#topwords-list {
+    display: flex;
+    flex-direction: row;
+}
+
+#topwords-container .each-topword {
+    width: 100px;
+    border: #000 1px solid;
+    text-align: center;
+}
 /* Segments */
 .speaker-btn {
     margin-right: 4px;
@@ -103,4 +118,3 @@ progress::-webkit-progress-value {
     background-color: black;
     height: 100%;
 }
-
