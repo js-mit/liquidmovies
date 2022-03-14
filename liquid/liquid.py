@@ -9,7 +9,7 @@ from .models import Liquid, Video, Treatment
 from .treatment import render_data
 from .tasks import process_job_data
 from .util import get_duration_and_frame_count
-from .topwords import get_topwords
+from .topwords import get_topwords_for_speech_search, get_topwords_for_image_search,get_topwords_for_text_search
 from .ui.forms import UploadVideoForm
 
 
@@ -32,9 +32,8 @@ def liquid(liquid_id: int):
     data = s3.download_liquid_by_url(liquid.url)
     data = render_data(data, liquid.treatment_id)
 
-    topnum = 10
-    topwords = get_topwords(data, topnum)
 
+    return render_template("liquid.html", liquid=liquid, data=data)
     return render_template("liquid.html", liquid=liquid, data=data, topwords=topwords)
 
 

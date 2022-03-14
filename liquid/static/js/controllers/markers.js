@@ -3,7 +3,6 @@
 $(document).ready(function () {
     var progressContainer = $("#progress-container");
     var searchText = $("#video-search input:text");
-    var topwords = $("topwords-container");
 
     // markers
     function addMarker(video, second) {
@@ -76,16 +75,25 @@ $(document).ready(function () {
     }
 
     function addTopwords() {
-        for (var i = 0; i < _topwords.length; i++) {
+        var topwords = [];
+        if (_treatment == 2) {
+            topwords = _data[_data.length - 1];
+            topwords = topwords["topwords"];
+        }
+        if (_treatment == 1) topwords = _data["topwords"];
+
+        for (var i = 0; i < topwords.length; i++) {
+            console.log(topwords[i]);
             var word = $(
-                `<span id=${i} class="each-topword">${_topwords[i]}</span>`
+                `<span id=${i} class="each-topword">${topwords[i]}</span>`
             );
             $("#topwords-list").append(word);
             word.click(function () {
                 var id = $(this).attr("id");
-                // console.log("word clicked", _topwords[id]);
                 if (_treatment == 2) {
-                    searchimages(_topwords[id]);
+                    searchimages(topwords[id]);
+                } else if (_treatment == 1) {
+                    searchText(topwords[id]);
                 }
             });
         }
